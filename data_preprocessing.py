@@ -37,6 +37,7 @@ def is_equal(m, n):
     else:
         return 0
 
+
 with open(working_dir + "List.txt") as l:
     lines = l.readlines()
 
