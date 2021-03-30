@@ -4,11 +4,11 @@
 Author : Yuanqing Mei
 Date : 2021/3/29
 Time: 19:47
-File: magnify1000.py
+File: magnify100.py
 HomePage : http://github.com/yuanqingmei
 Email : dg1533019@smail.nju.edu.cn
 
-For the TDtool does not derive the threshold for a decimal value, we magnify a decimal metric by 1000 times.
+For the TDtool does not derive the threshold for a decimal value, we magnify a decimal metric by 100 times.
 """
 
 import os
@@ -49,6 +49,7 @@ for line in lines:
 
     # 去掉含有缺失值的样本（行）
     df.dropna(axis=0, how='any', thresh=None, subset=None, inplace=True)
+    print("the types of df is ", df.dtypes)
 
     # removes the undefined metric values to the undefined_file.csv.
     with open(working_dir + file, 'r', encoding="ISO-8859-1") as file_input, \
@@ -82,11 +83,12 @@ for line in lines:
                 # decimal_point_sum_value = df[field_name].sum()
                 print("the decimal_point_sum is ", decimal_point_sum)
                 if decimal_point_sum > 0:
-                    df[field_name] = df[field_name].multiply(1000).astype(int)
+                    df[field_name] = df[field_name].multiply(100).round()
+                    print("the magnified column type is ", df[field_name].dtype)
                     decimal_metric.append(field_name)
 
                 # transform all float type to int
-                df[field_name] = df[field_name].astype(int)
+                df[field_name] = df[field_name].apply(lambda x: int(x))
 
             # break
 
