@@ -27,7 +27,6 @@ pd.set_option('max_colwidth', 100)
 
 
 working_dir = "F:\\NJU\\MTmeta\\experiments\\unsupervised\\ValeThreshold\\"
-
 result_dir = "F:\\NJU\\MTmeta\\experiments\\unsupervised\\ValeThresholdMinified\\"
 
 os.chdir(working_dir)
@@ -45,22 +44,36 @@ for line in lines:
     print(repr(line))
     print(file)
 
-    df_decimal = pd.read_csv(working_dir + "decimal_metric_file.csv", encoding='utf-8', header=-1)
-    print("the types of df_decimal is ", df_decimal.dtypes)
-    print("the df is ", df_decimal)
+    df_decimal = pd.read_csv(working_dir + "decimal_metric_file.csv", encoding='utf-8', header=None)
+    df = pd.read_csv(working_dir + file[:-4] + "\\Vale's Method Output\\Final-Result.csv", sep=';',
+                     keep_default_na=False)
+
+    df['metric_label'] = df.apply(lambda x: x['Metric'] + "_" + x['Lable'], axis=1)
+    Vale_Threshold_minified_fieldname = ["fileName"]
+    for i in range(len(df['metric_label'])):
+        Vale_Threshold_minified_fieldname.append(df.loc[i, 'metric_label'])
+
 
     # reads a csv file and stores as dataframe
     with open(working_dir + file[:-4] + "\\Vale's Method Output\\Final-Result.csv",
               'r', encoding="ISO-8859-1") as df_input, \
-            open(working_dir + "decimal_metric_file.csv", 'r', encoding="utf-8", newline='') as decimal_input, \
             open(result_dir + "Vale_Threshold_minified.csv", 'a+', encoding="utf-8", newline='') as file_output:
 
-        df = pd.read_csv(df_input, sep=';')
-
-        print("the types of df is ", df.dtypes)
-        print("the df is ", df)
-
         writer = csv.writer(file_output)
+        print("the size of file_output is ",os.path.getsize(result_dir + "Vale_Threshold_minified.csv"))
+        if os.path.getsize(result_dir + "Vale_Threshold_minified.csv") == 0:
+            writer.writerow(Vale_Threshold_minified_fieldname)
 
-        # writer.writerow(decimal_metric)
-        break
+        df = pd.read_csv(df_input, sep=';', keep_default_na=False)
+        df['metric_label'] = df.apply(lambda x: x['Metric'] + "_" + x['Lable'], axis=1)
+        print("the df is ", df['metric_label'])
+        # df_metric_value = pd.merge(df['metric_label'] + df['Value'])
+        # print("the transform of df is ", df.transpose())
+        Vale_Threshold_minified_row = [file[:-4]]
+        for i in range(len(df['metric_label'])):
+            Vale_Threshold_minified_fieldname.append(df.loc[i, 'metric_label'])
+            Vale_Threshold_minified_row.append(df.loc[i, 'Value'])
+
+        writer.writerow(Vale_Threshold_minified_row)
+
+        # break
