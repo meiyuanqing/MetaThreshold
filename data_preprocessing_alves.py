@@ -13,6 +13,7 @@ Email : dg1533019@smail.nju.edu.cn
 （2）度量只能是大于零的数值，不能为字符型
 （3）csv中只能用分号分隔
 （4）Alves中必须有loc度量
+At the same time, removes the metrics that all equal to zero.
 """
 
 import os
@@ -66,7 +67,7 @@ for line in lines:
                       "Name", "File", "CAMC", "Co", "DCd", "DCi", "LCC", "LCOM1", "LCOM2", "LCOM3", "LCOM4", "LCOM5",
                       "NHD", "NewCo", "NewLCOM5", "OCC", "PCC", "SNHD", "TCC"]
 
-        # sort out field names including the undefined metric values.
+        # sort out field names including the undefined metric values and all-zero metrics.
         undefined_field = []
         undefined_field.append(file)
         for field_name in fieldnames:
@@ -89,6 +90,14 @@ for line in lines:
                 undefined_field.append(field_name)
                 df.drop(columns=[field_name], inplace=True)
                 print("the non metric of ", field_name, " is deleted!")
+
+            # removes the metrics with all zero values
+            if (field_name in df.columns.values.tolist()) and (df[field_name].value_counts().count() <= 1):
+                print("The metric ", field_name, " and its sum value is ", df[field_name].value_counts().count())
+                undefined_field.append(field_name)
+                df.drop(columns=[field_name], inplace=True)
+                print("the all-zero metric of ", field_name, " is deleted!")
+
 
         df.to_csv(result_dir + file, encoding="ISO-8859-1", index=False, mode='a')
         writer.writerow(undefined_field)
