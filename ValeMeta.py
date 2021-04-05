@@ -154,18 +154,15 @@ def vale_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingData\\"
         # chooses the high level value as the threshold
         if metric[-5:] != "_High":
             continue
-
+        # There are no more than 10 values of DCAEC and DCMEC metric, which are greater than 0. drop it
         if (metric[:-5] == "DCAEC") or (metric[:-5] == "DCMEC"):
             continue
 
         print("the current metric is ", metric)
         print("the current metric is ", metric[:-5])
 
-        # threshold = "VARLThreshold"
         threshold_effect_size = df.loc[:, metric]
 
-        # threshold_variance = "VARL_variance"
-        # threshold_variance = df[df["metric"] == metric].loc[:, threshold_variance]
         threshold_variance = []
         for i in range(len(df["fileName"])):
             file_name = df.loc[i, "fileName"]
@@ -173,7 +170,7 @@ def vale_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingData\\"
             mean_metric = df_metric[metric[:-5]].mean()
             variance_metric = df_metric[metric[:-5]].var()
             threshold_metric = df.loc[i, metric]
-            # print(mean_metric, variance_metric, threshold_metric, (threshold_metric/mean_metric) ** 2 * variance_metric)
+            # print(mean_metric,variance_metric,threshold_metric,(threshold_metric/mean_metric) ** 2 * variance_metric)
             threshold_variance.append((threshold_metric/mean_metric) ** 2 * variance_metric)
 
         metaThreshold = pd.DataFrame()
@@ -187,8 +184,13 @@ def vale_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingData\\"
             with open(meta_dir + "Vale_metaThresholds.csv", 'a+', encoding="utf-8", newline='') as f:
                 writer_f = csv.writer(f)
                 if os.path.getsize(meta_dir + "Vale_metaThresholds.csv") == 0:
-                    writer_f.writerow(["metric", "Vale_metaThreshold", "Vale_metaThreshold_stdError"])
-                writer_f.writerow([metric, resultMetaAnalysis["mean"], resultMetaAnalysis["stdError"]])
+                    writer_f.writerow(["metric", "Vale_metaThreshold", "Vale_metaThreshold_stdError", "LL_CI", "UL_CI",
+                                       "ZValue", "pValue_Z", "Q", "df", "pValue_Q", "I2", "tau"])
+                writer_f.writerow([metric, resultMetaAnalysis["mean"], resultMetaAnalysis["stdError"],
+                                   resultMetaAnalysis["LL_CI"], resultMetaAnalysis["UL_CI"],
+                                   resultMetaAnalysis["ZValue"], resultMetaAnalysis["pValue_Z"],
+                                   resultMetaAnalysis["Q"], resultMetaAnalysis["df"], resultMetaAnalysis["pValue_Q"],
+                                   resultMetaAnalysis["I2"], resultMetaAnalysis["tau"]])
 
         except Exception as err1:
             print(err1)
@@ -196,8 +198,6 @@ def vale_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingData\\"
         k += 1
         # if k == 1:
         #     break
-
-
 
 
 if __name__ == '__main__':
