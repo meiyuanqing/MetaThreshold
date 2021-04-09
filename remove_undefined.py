@@ -46,7 +46,7 @@ for line in lines:
         df = pd.read_csv(df_input)
 
     # removes the undefined metric values to the undefined_file.csv.
-    with open(working_dir +  file, 'r', encoding="ISO-8859-1") as file_input, \
+    with open(working_dir + file, 'r', encoding="ISO-8859-1") as file_input, \
             open(result_dir + "undefined_file.csv", 'a+', encoding="utf-8", newline='') as file_output:
 
         reader = csv.reader(file_input)
