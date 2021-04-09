@@ -157,23 +157,60 @@ def pooled_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\pooled\\PoolingThresholds\\
     print("the files are ", lines)
     print("the number of list files is ", len(lines))
 
-    for line in lines:
-        file = line.replace("\n", "")
+    for metric in metric_names:
 
-        # if file != "camel-1.4.0.csv":
-        #     continue
-        print("the current file is ", file)
-        print("the current repr file is ", repr(file))
-        # project_file: a csv file of a version source code from a project；Bender_threshold：stores threshold values；
-        with open(metric_dir + file, 'r', encoding="ISO-8859-1") as threshold_file, \
-             open(meta_dir + "Pooled_thresholds.csv", 'a+', encoding="utf-8", newline='') as Pooled_threshold, \
-             open(meta_dir + "deletedList.csv", 'a+', encoding="utf-8", newline='') as deletedList:
-            reader = csv.reader(threshold_file)
-            writer = csv.writer(Pooled_threshold)
-            writer_deletedList = csv.writer(deletedList)
-            # receives the first line of a file and convert to dict generator
-            fieldnames = next(reader)
+        print("the current metric is ", metric)
 
+        if metric == 'bug':
+            continue
+
+        threshold_effect_size = []
+
+        threshold_variance = []
+
+        for line in lines:
+
+            file = line.replace("\n", "")
+            print("the current file is ", file)
+            print("the current file is ", file[:-5])
+
+            # threshold_file: a method to derive threshold; Pooled_thresholds: the meta-analysis results of threshold
+            df = pd.read_csv(metric_dir + file, keep_default_na=False, na_values=[""])
+            if len(df[df["metric"] == metric].loc[:, file[:-5]].values) == 0:
+                continue
+
+            threshold_effect_size.append(float(df[df["metric"] == metric].loc[:, file[:-5]].values[0]))
+            threshold_variance.append(float(df[df["metric"] == metric].loc[:, file[:-5] + "_stdError"].values[0]))
+
+        print("the threshold_effect_size items are ", threshold_effect_size)
+        print("the len of threshold_effect_size items is ", len(threshold_effect_size))
+        print("the threshold_variance items are ", threshold_variance)
+        print("the len of threshold_variance items is ", len(threshold_variance))
+
+        metaThreshold = pd.DataFrame()
+        metaThreshold['EffectSize'] = threshold_effect_size
+        metaThreshold['Variance'] = threshold_variance
+        try:
+            resultMetaAnalysis = random_effect_meta_analysis(
+                np.array(metaThreshold[metaThreshold["EffectSize"] > 0].loc[:, "EffectSize"]),
+                np.array(metaThreshold[metaThreshold["EffectSize"] > 0].loc[:, "Variance"]))
+
+            with open(meta_dir + "Pooled_thresholds.csv", 'a+', encoding="utf-8", newline='') as f:
+                writer_f = csv.writer(f)
+                if os.path.getsize(meta_dir + "Pooled_thresholds.csv") == 0:
+                    writer_f.writerow(
+                        ["metric", "Pooled_meta_threshold", "Pooled_meta_threshold_stdError", "LL_CI", "UL_CI",
+                         "ZValue", "pValue_Z", "Q", "df", "pValue_Q", "I2", "tau", "number_of_effect_size"])
+                writer_f.writerow([metric, resultMetaAnalysis["mean"], resultMetaAnalysis["stdError"],
+                                   resultMetaAnalysis["LL_CI"], resultMetaAnalysis["UL_CI"],
+                                   resultMetaAnalysis["ZValue"], resultMetaAnalysis["pValue_Z"],
+                                   resultMetaAnalysis["Q"], resultMetaAnalysis["df"], resultMetaAnalysis["pValue_Q"],
+                                   resultMetaAnalysis["I2"], resultMetaAnalysis["tau"], len(threshold_effect_size)])
+
+        except Exception as err1:
+            print(err1)
+
+        # break
 
 
 if __name__ == '__main__':
