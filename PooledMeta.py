@@ -200,12 +200,14 @@ def pooled_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\pooled\\PoolingThresholds\\
                 if os.path.getsize(meta_dir + "Pooled_thresholds.csv") == 0:
                     writer_f.writerow(
                         ["metric", "Pooled_meta_threshold", "Pooled_meta_threshold_stdError", "LL_CI", "UL_CI",
-                         "ZValue", "pValue_Z", "Q", "df", "pValue_Q", "I2", "tau", "number_of_effect_size"])
+                         "ZValue", "pValue_Z", "Q", "df", "pValue_Q", "I2", "tau",
+                         "LL_ndPred", "UL_tdPred", "number_of_effect_size"])
                 writer_f.writerow([metric, resultMetaAnalysis["mean"], resultMetaAnalysis["stdError"],
                                    resultMetaAnalysis["LL_CI"], resultMetaAnalysis["UL_CI"],
                                    resultMetaAnalysis["ZValue"], resultMetaAnalysis["pValue_Z"],
                                    resultMetaAnalysis["Q"], resultMetaAnalysis["df"], resultMetaAnalysis["pValue_Q"],
-                                   resultMetaAnalysis["I2"], resultMetaAnalysis["tau"], len(threshold_effect_size)])
+                                   resultMetaAnalysis["I2"], resultMetaAnalysis["tau"], resultMetaAnalysis["LL_ndPred"],
+                                   resultMetaAnalysis["UL_tdPred"], len(threshold_effect_size)])
 
         except Exception as err1:
             print(err1)
