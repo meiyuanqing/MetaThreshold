@@ -132,6 +132,72 @@ def pearson_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\supervised\\PearsonEffect\
         rp = (np.exp(2 * fisher_Z) - 1) / (np.exp(2 * fisher_Z) + 1)
         return rp
 
+    def getEstimatedK0(effectSizeArray, mean):
+        centeredEffectSizeArray = []
+        absoluteCenteredEffectSizeArray = []
+        size = len(effectSizeArray)
+        for i in range(size):
+            centeredEffectSizeArray[i] = effectSizeArray[i] - mean
+            absoluteCenteredEffectSizeArray[i] = np.abs(effectSizeArray[i] - mean)
+        sortedArray = sorted(absoluteCenteredEffectSizeArray)
+        rank = pd.DataFrame()
+        rank[sortedArray[0]] = 1
+        initialRankValue = 1
+        predValue = sortedArray[0]
+        for i in range(size):
+            if sortedArray[i] > predValue:
+                predValue = sortedArray[i]
+                initialRankValue += 1
+            rank[sortedArray[i]] = initialRankValue
+        finalRank = []
+        for i in range(size):
+            if centeredEffectSizeArray[i] < 0:
+                finalRank[i] = (-1) * rank[absoluteCenteredEffectSizeArray[i]]
+            else:
+                finalRank[i] = rank[absoluteCenteredEffectSizeArray[i]]
+        gamma = finalRank[size - 1] + finalRank[0]
+        SumPositiveRank = 0
+        for i in range(size):
+            if finalRank[i] < 0:
+                continue
+            SumPositiveRank = SumPositiveRank + finalRank[i]
+        R0 = int(gamma + 0.5) - 1
+        temp = (4 * SumPositiveRank - size * (size + 1)) / (2 * size - 1)
+        L0 = int(temp + 0.5)
+        if R0 < 0:
+            R0 = 0
+        if L0 < 0:
+            L0 = 0
+        return R0, L0
+
+    # Duval and Tweedie's trim and fill method
+    def trimAndFill(effect_size, variance, isAUC):
+        size = len(effect_size)
+        # 检查是否需要切换方向，因为trim and fill方法假设miss most negative的研究
+        flipFunnel = 0
+        metaAnalysisForFlip = fixed_effect_meta_analysis(effect_size, variance)
+        meanForFlip = metaAnalysisForFlip["fixedMean"]
+
+        tempSorted = sorted(effect_size)
+        min = tempSorted[0] - meanForFlip
+        max = tempSorted[-1] - meanForFlip
+
+        if np.abs(min) > np.abs(max):
+            flipFunnel = 1
+            for i in range(len(effect_size)):
+                effect_size[i] = (-1) * effect_size[i]
+
+        # 按effect size排序
+        merge = []
+        for i in range(size):
+            merge.append([effect_size[i], variance[i]])
+        sortedMerge = sorted(merge)
+        OrignalEffectSizeArray = []
+        OrignalVarianceArray = []
+        for i in range(len(sortedMerge)):
+            OrignalEffectSizeArray.append(sortedMerge[i][0])
+            OrignalVarianceArray.append(sortedMerge[i][1])
+
     metric_dir = t_dir
     meta_dir = m_dir
     os.chdir(metric_dir)
