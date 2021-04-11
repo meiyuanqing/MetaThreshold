@@ -39,9 +39,10 @@ def fixed_effect_meta_analysis(effect_size, variance):
     d['fixedStdError'] = fixedStdError
     return d
 
-    # 输入：两个匿名数组，effect_size中存放每个study的effect size，variance存放对应的方差
-    # 输出：random effect model随机效应元分析后的结果，包括：
-    #      (1) randomMean：随机模型元分析后得到的效应平均值； (2) randomStdError：随机模型元分析的效应平均值对应的标准错
+
+# 输入：两个匿名数组，effect_size中存放每个study的effect size，variance存放对应的方差
+# 输出：random effect model随机效应元分析后的结果，包括：
+#      (1) randomMean：随机模型元分析后得到的效应平均值； (2) randomStdError：随机模型元分析的效应平均值对应的标准错
 def random_effect_meta_analysis(effect_size, variance):
 
     sum_Wi = 0
@@ -76,15 +77,25 @@ def random_effect_meta_analysis(effect_size, variance):
     else:
         T2 = (Q - df) / C  # sample estimate of tau square
 
+    print("upcaseQ = ", Q, "\n")
+    print("upcaseT2 = ", T2, "\n")
+
     if T2 < 0:
-        T2 = (- 1) * T2  # 20190719，若T2小于0，取相反数
+        T2 = 0  # 20190719，若T2小于0，取相反数
+        # T2 = (- 1) * T2  # 20190719，若T2小于0，取相反数
 
     for i in range(study_number):
         random_weight[i] = 1 / (variance[i] + T2)  # random_weight 随机模型对应的权值
+        print("the ", i, " variance is ", variance[i], " and the random_weight is ", random_weight[i])
 
     for i in range(study_number):
         sum_Wistar = sum_Wistar + random_weight[i]
         sum_WistarYi = sum_WistarYi + random_weight[i] * effect_size[i]
+        print("the ", i, " effect_size is ", effect_size[i], " and the sum_Wistar is ", sum_Wistar,
+              " and the sum_WistarYi is ", sum_WistarYi)
+
+    print("sum_Wistar = ", sum_Wistar, "\n")
+    print("sum_WistarYi = ", sum_WistarYi, "\n")
 
     randomMean = sum_WistarYi / sum_Wistar  # 随机模型元分析后得到的效应平均值
     randomStdError = (1 / sum_Wistar) ** 0.5  # 随机模型元分析的效应平均值对应的标准错
@@ -283,6 +294,16 @@ if __name__ == '__main__':
           "\n", meta_1['flipFunnel'], "\n")
     meta_2 = random_effect_meta_analysis(a, b)
     print(meta_2['mean'], "\n", meta_2['stdError'], "\n", meta_2['pValue_Z'], "\n")
+
+    print("############################################")
+
+    c = [0.095, 0.277, 0.367, 0.664, 0.462, 0.185]
+    d = [0.033, 0.031, 0.05, 0.011, 0.043, 0.023]
+    meta_3 = fixed_effect_meta_analysis(c, d)
+    print("the fixedEffectMetaAnalysis is ", meta_3['fixedMean'], "\n", meta_3['fixedStdError'], "\n")
+    meta_4 = random_effect_meta_analysis(c, d)
+    print("the randomEffectMetaAnalysis is ", meta_4['mean'], "\n", meta_4['stdError'], "\n", meta_4['pValue_Z'], "\n")
+
     e_time = time.time()
     execution_time = e_time - s_time
 
