@@ -81,7 +81,8 @@ def pearson_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\supervised\\PearsonEffect\
             T2 = (Q - df) / C  # sample estimate of tau square
 
         if T2 < 0:
-            T2 = (- 1) * T2  # 20190719，若T2小于0，取相反数
+            T2 = 0  # 20210411，若T2小于0，取0,   M.Borenstein[2009] P114
+            # T2 = (- 1) * T2  # 20190719，若T2小于0，取相反数
 
         for i in range(study_number):
             random_weight[i] = 1 / (variance[i] + T2)  # random_weight 随机模型对应的权值
@@ -137,11 +138,10 @@ def pearson_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\supervised\\PearsonEffect\
         absoluteCenteredEffectSizeArray = []
         size = len(effectSizeArray)
         for i in range(size):
-            centeredEffectSizeArray[i] = effectSizeArray[i] - mean
-            absoluteCenteredEffectSizeArray[i] = np.abs(effectSizeArray[i] - mean)
+            centeredEffectSizeArray.append(effectSizeArray[i] - mean)
+            absoluteCenteredEffectSizeArray.append(np.abs(effectSizeArray[i] - mean))
         sortedArray = sorted(absoluteCenteredEffectSizeArray)
-        rank = pd.DataFrame()
-        rank[sortedArray[0]] = 1
+        rank = {sortedArray[0]: 1}  # return a dict
         initialRankValue = 1
         predValue = sortedArray[0]
         for i in range(size):
@@ -152,9 +152,9 @@ def pearson_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\supervised\\PearsonEffect\
         finalRank = []
         for i in range(size):
             if centeredEffectSizeArray[i] < 0:
-                finalRank[i] = (-1) * rank[absoluteCenteredEffectSizeArray[i]]
+                finalRank.append((-1) * rank[absoluteCenteredEffectSizeArray[i]])
             else:
-                finalRank[i] = rank[absoluteCenteredEffectSizeArray[i]]
+                finalRank.append(rank[absoluteCenteredEffectSizeArray[i]])
         gamma = finalRank[size - 1] + finalRank[0]
         SumPositiveRank = 0
         for i in range(size):
@@ -172,20 +172,22 @@ def pearson_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\supervised\\PearsonEffect\
 
     # Duval and Tweedie's trim and fill method
     def trimAndFill(effect_size, variance, isAUC):
+        effectSizeArray = effect_size
+        varianceArray = variance
         size = len(effect_size)
         # 检查是否需要切换方向，因为trim and fill方法假设miss most negative的研究
         flipFunnel = 0
-        metaAnalysisForFlip = fixed_effect_meta_analysis(effect_size, variance)
+        metaAnalysisForFlip = fixed_effect_meta_analysis(effectSizeArray, varianceArray)
         meanForFlip = metaAnalysisForFlip["fixedMean"]
 
-        tempSorted = sorted(effect_size)
+        tempSorted = sorted(effectSizeArray)
         min = tempSorted[0] - meanForFlip
         max = tempSorted[-1] - meanForFlip
 
         if np.abs(min) > np.abs(max):
             flipFunnel = 1
-            for i in range(len(effect_size)):
-                effect_size[i] = (-1) * effect_size[i]
+            for i in range(size):
+                effectSizeArray[i] = (-1) * effectSizeArray[i]
 
         # 按effect size排序
         merge = []
@@ -197,6 +199,73 @@ def pearson_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\supervised\\PearsonEffect\
         for i in range(len(sortedMerge)):
             OrignalEffectSizeArray.append(sortedMerge[i][0])
             OrignalVarianceArray.append(sortedMerge[i][1])
+        # 迭代算法，估算k0
+        metaAnalysisResult = fixed_effect_meta_analysis(OrignalEffectSizeArray, OrignalVarianceArray)
+        mean = metaAnalysisResult["fixedMean"]
+        RL = getEstimatedK0(OrignalEffectSizeArray, mean)
+        R0 = RL[0]
+        L0 = RL[1]
+        k0 = L0  # 默认的情况利用L0来估算k0
+        if (k0 == 0) or (k0 > size):
+            result = random_effect_meta_analysis(effect_size, variance)
+            result["k0"] = k0
+            return result
+        trimmedMean = mean
+        change = 1
+        count = 0
+        while change and (size - k0) > 2 and (count < 1000):
+            count += 1
+            upperBound = size - k0 - 1
+            trimmedEffectSizeArray = []
+            trimmedVarianceArray = []
+            for i in range(upperBound):
+                trimmedEffectSizeArray.append(OrignalEffectSizeArray[i])
+                trimmedVarianceArray.append(OrignalVarianceArray[i])
+            trimmedMetaAnalysisResult = fixed_effect_meta_analysis(trimmedEffectSizeArray, trimmedVarianceArray)
+            trimmedMean = trimmedMetaAnalysisResult["fixedMean"]
+            trimmedR0_L0 = getEstimatedK0(OrignalEffectSizeArray, trimmedMean)
+            trimmedR0 = trimmedR0_L0[0]
+            trimmedL0 = trimmedR0_L0[1]
+            k1 = trimmedL0
+            if k1 == k0:
+                change = 0
+            k0 = k1
+        filledEffectSizeArray = []
+        filledVarianceArray = []
+
+        for j in range(k0):
+            imputedEffectSize = 2 * trimmedMean - OrignalEffectSizeArray[size - j - 1]
+            imputedVariance = OrignalVarianceArray[size - j - 1]
+            filledEffectSizeArray.append(imputedEffectSize)
+            filledVarianceArray.append(imputedVariance)
+        fullEffectSizeArray = filledEffectSizeArray
+        fullVarianceArray = filledVarianceArray
+        fullEffectSizeArray.extend(OrignalEffectSizeArray)
+        fullVarianceArray.extend(OrignalVarianceArray)
+        if flipFunnel:
+            newSize = len(fullEffectSizeArray)
+            for i in range(newSize):
+                fullEffectSizeArray[i] = -1 * fullEffectSizeArray[i]
+
+        if isAUC:
+            # AUC应该在0到1之间，否则有错
+            filteredFullEffectSizeArray = []
+            filteredFullVarianceArray = []
+            for i in range(len(fullEffectSizeArray)):
+                if fullEffectSizeArray[i] < 0:
+                    continue
+                if fullEffectSizeArray[i] > 1:
+                    continue
+                filteredFullEffectSizeArray.append(fullEffectSizeArray[i])
+                filteredFullVarianceArray.append(fullVarianceArray[i])
+            result = random_effect_meta_analysis(filteredFullEffectSizeArray, filteredFullVarianceArray)
+            finalk0 = len(filteredFullEffectSizeArray) - len(OrignalEffectSizeArray)
+        else:
+            result = random_effect_meta_analysis(fullEffectSizeArray, fullVarianceArray)
+            finalk0 = len(fullEffectSizeArray) - len(OrignalEffectSizeArray)
+        result["k0"] = finalk0
+        result["flipFunnel"] = flipFunnel
+        return result
 
     metric_dir = t_dir
     meta_dir = m_dir
@@ -220,14 +289,14 @@ def pearson_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\supervised\\PearsonEffect\
         print("the current metric is ", metric)
 
         FisherZ_effect_size = df[df["metric"] == metric].loc[:, "Fisher_Z"].astype(float)
-        print("the FisherZ_effect_size items are ", FisherZ_effect_size)
-        print("the type FisherZ_effect_size items are ", type(FisherZ_effect_size))
-        print("the len of FisherZ_effect_size items is ", len(FisherZ_effect_size))
+        # print("the FisherZ_effect_size items are ", FisherZ_effect_size)
+        # print("the type FisherZ_effect_size items are ", type(FisherZ_effect_size))
+        # print("the len of FisherZ_effect_size items is ", len(FisherZ_effect_size))
 
         FisherZ_variance = df[df["metric"] == metric].loc[:, "Fisher_Z_variance"]
-        print("the threshold_variance items are ", FisherZ_variance)
-        print("the type threshold_variance items are ", type(FisherZ_variance))
-        print("the len of threshold_variance items is ", len(FisherZ_variance))
+        # print("the threshold_variance items are ", FisherZ_variance)
+        # print("the type threshold_variance items are ", type(FisherZ_variance))
+        # print("the len of threshold_variance items is ", len(FisherZ_variance))
 
         metaThreshold = pd.DataFrame()
         metaThreshold['EffectSize'] = FisherZ_effect_size
@@ -241,18 +310,37 @@ def pearson_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\supervised\\PearsonEffect\
             # d["UL_CI"] = randomMean + 1.96 * randomStdError  # The 95% upper limits for the summary effect
             meta_stdError = (inverse_Fisher_Z(resultMetaAnalysis["UL_CI"])
                              - inverse_Fisher_Z(resultMetaAnalysis["LL_CI"])) / (1.96 * 2)
+
+            adjusted_result = trimAndFill(
+                np.array(metaThreshold[metaThreshold["EffectSize"] > 0].loc[:, "EffectSize"]),
+                np.array(metaThreshold[metaThreshold["EffectSize"] > 0].loc[:, "Variance"]), 0)
+            meta_stdError_adjusted = (inverse_Fisher_Z(adjusted_result["UL_CI"])
+                             - inverse_Fisher_Z(adjusted_result["LL_CI"])) / (1.96 * 2)
+            if resultMetaAnalysis["pValue_Z"] > 0.5:
+                direction = 0
+            else:
+                if inverse_Fisher_Z(resultMetaAnalysis["mean"]) > 0:
+                    direction = 1
+                else:
+                    direction = -1
+
             with open(meta_dir + "Pearson_effects_meta.csv", 'a+', encoding="utf-8", newline='') as f:
                 writer_f = csv.writer(f)
                 if os.path.getsize(meta_dir + "Pearson_effects_meta.csv") == 0:
                     writer_f.writerow(
                         ["metric", "Pearson_effects_meta", "Pearson_effects_meta_stdError", "LL_CI", "UL_CI",
-                         "ZValue", "pValue_Z", "Q", "df", "pValue_Q", "I2", "tau", "number_of_effect_size"])
+                         "ZValue", "pValue_Z", "Q", "df", "pValue_Q", "I2", "tau", "number_of_effect_size",
+                         "k_0", "Pearson_effects_meta_adjusted", "Pearson_effects_meta_stdError_adjusted",
+                         "LL_CI_adjusted", "UL_CI_adjusted", "direction"])
                 writer_f.writerow([metric, inverse_Fisher_Z(resultMetaAnalysis["mean"]), meta_stdError,
                                    inverse_Fisher_Z(resultMetaAnalysis["LL_CI"]),
                                    inverse_Fisher_Z(resultMetaAnalysis["UL_CI"]),
                                    resultMetaAnalysis["ZValue"], resultMetaAnalysis["pValue_Z"],
                                    resultMetaAnalysis["Q"], resultMetaAnalysis["df"], resultMetaAnalysis["pValue_Q"],
-                                   resultMetaAnalysis["I2"], resultMetaAnalysis["tau"], len(FisherZ_effect_size)])
+                                   resultMetaAnalysis["I2"], resultMetaAnalysis["tau"], len(FisherZ_effect_size),
+                                   adjusted_result["k0"], inverse_Fisher_Z(adjusted_result["mean"]),
+                                   meta_stdError_adjusted, inverse_Fisher_Z(adjusted_result["LL_CI"]),
+                                   inverse_Fisher_Z(adjusted_result["UL_CI"]), direction])
 
         except Exception as err1:
             print(err1)
