@@ -10,6 +10,9 @@ Email : dg1533019@smail.nju.edu.cn
 
 Sensitive analysis by trim and fill method.
 
+Reference:
+[1] M.Borenstein, L.V. Hedges, J.P.T. Higgins, H.R. Rothstein. Introduction to meta-analysis, John Wiley & Sons, 2009;
+
 """
 import time
 import numpy as np
@@ -81,7 +84,7 @@ def random_effect_meta_analysis(effect_size, variance):
     print("upcaseT2 = ", T2, "\n")
 
     if T2 < 0:
-        T2 = 0  # 20190719，若T2小于0，取相反数
+        T2 = 0  # 20210411，若T2小于0，取0,   M.Borenstein[2009] P114
         # T2 = (- 1) * T2  # 20190719，若T2小于0，取相反数
 
     for i in range(study_number):
