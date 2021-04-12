@@ -286,60 +286,55 @@ def roc_meta(m_dir="F:\\NJU\\MTmeta\\experiments\\supervised\\RocThreshold\\"):
         supvervised_methods = ["auc_threshold", "gm_threshold", "bpp_threshold",
                                "mfm_threshold", "roc_threshold", "varl_threshold"]
         # varl_threshold_variance
-        for s in supvervised_methods:
+        for method in supvervised_methods:
 
-            print("the s is ", s, "the s_variance is ", s + "_variance")
-            variance = s + "_variance"
-            s = df[df["metric"] == metric].loc[:, s].astype(float)
-            s_variance = df[df["metric"] == metric].loc[:, variance].astype(float)
+            print("the s is ", method, "the s_variance is ", method + "_variance")
+            s = df[df["metric"] == metric].loc[:, method].astype(float)
+            s_variance = df[df["metric"] == metric].loc[:, method + "_variance"].astype(float)
 
             metaThreshold = pd.DataFrame()
             metaThreshold['EffectSize'] = s
             metaThreshold['Variance'] = s_variance
-            # try:
-            resultMetaAnalysis = random_effect_meta_analysis(
-                np.array(metaThreshold[metaThreshold["EffectSize"] > 0].loc[:, "EffectSize"]),
-                np.array(metaThreshold[metaThreshold["EffectSize"] > 0].loc[:, "Variance"]))
+            try:
+                resultMetaAnalysis = random_effect_meta_analysis(
+                    np.array(metaThreshold[metaThreshold["EffectSize"] > 0].loc[:, "EffectSize"]),
+                    np.array(metaThreshold[metaThreshold["EffectSize"] > 0].loc[:, "Variance"]))
 
-            # d["LL_CI"] = randomMean - 1.96 * randomStdError  # The 95% lower limits for the summary effect
-            # d["UL_CI"] = randomMean + 1.96 * randomStdError  # The 95% upper limits for the summary effect
-            meta_stdError = (resultMetaAnalysis["UL_CI"] - resultMetaAnalysis["LL_CI"]) / (1.96 * 2)
+                # d["LL_CI"] = randomMean - 1.96 * randomStdError  # The 95% lower limits for the summary effect
+                # d["UL_CI"] = randomMean + 1.96 * randomStdError  # The 95% upper limits for the summary effect
+                meta_stdError = (resultMetaAnalysis["UL_CI"] - resultMetaAnalysis["LL_CI"]) / (1.96 * 2)
 
-            adjusted_result = trimAndFill(
-                np.array(metaThreshold[metaThreshold["EffectSize"] > 0].loc[:, "EffectSize"]),
-                np.array(metaThreshold[metaThreshold["EffectSize"] > 0].loc[:, "Variance"]), 0)
-            meta_stdError_adjusted = (adjusted_result["UL_CI"] - adjusted_result["LL_CI"]) / (1.96 * 2)
-            with open(meta_dir + s + "_meta.csv", 'a+', encoding="utf-8", newline='') as f:
-                writer_f = csv.writer(f)
-                s_meta = s + "_meta"
-                s_meta_stdError = s + "_meta_stdError"
-                s_meta_adjusted = s + "_meta_adjusted"
-                s_meta_stdError_adjusted = s + "_meta_stdError_adjusted"
-                if os.path.getsize(meta_dir + s + "_meta.csv") == 0:
-                    writer_f.writerow(
-                        ["metric", s_meta, s_meta_stdError, "LL_CI", "UL_CI", "ZValue", "pValue_Z", "Q", "df",
-                         "pValue_Q", "I2", "tau", "LL_ndPred", "UL_ndPred", "number_of_effect_size",
-                         "k_0", s_meta_adjusted, s_meta_stdError_adjusted, "LL_CI_adjusted", "UL_CI_adjusted",
-                         "pValue_Z_adjusted", "Q_adjusted", "df_adjusted", "pValue_Q_adjusted", "I2_adjusted",
-                         "tau_adjusted", "LL_ndPred_adjusted", "UL_ndPred_adjusted"])
-                writer_f.writerow([metric, resultMetaAnalysis["mean"], meta_stdError, resultMetaAnalysis["LL_CI"],
-                                   resultMetaAnalysis["UL_CI"], resultMetaAnalysis["ZValue"],
-                                   resultMetaAnalysis["pValue_Z"], resultMetaAnalysis["Q"],
-                                   resultMetaAnalysis["df"], resultMetaAnalysis["pValue_Q"],
-                                   resultMetaAnalysis["I2"], resultMetaAnalysis["tau"],
-                                   resultMetaAnalysis["LL_ndPred"], resultMetaAnalysis["UL_ndPred"], len(s),
-                                   adjusted_result["k0"], adjusted_result["mean"], meta_stdError_adjusted,
-                                   adjusted_result["LL_CI"], adjusted_result["UL_CI"], adjusted_result["pValue_Z"],
-                                   adjusted_result["Q"], adjusted_result["df"], adjusted_result["pValue_Q"],
-                                   adjusted_result["I2"], adjusted_result["tau"], adjusted_result["LL_ndPred"],
-                                   adjusted_result["UL_ndPred"]])
+                adjusted_result = trimAndFill(
+                    np.array(metaThreshold[metaThreshold["EffectSize"] > 0].loc[:, "EffectSize"]),
+                    np.array(metaThreshold[metaThreshold["EffectSize"] > 0].loc[:, "Variance"]), 0)
+                meta_stdError_adjusted = (adjusted_result["UL_CI"] - adjusted_result["LL_CI"]) / (1.96 * 2)
+                with open(meta_dir + method + "_meta.csv", 'a+', encoding="utf-8", newline='') as f:
+                    writer_f = csv.writer(f)
+                    if os.path.getsize(meta_dir + method + "_meta.csv") == 0:
+                        writer_f.writerow(
+                            ["metric", method + "_meta", method + "_meta_stdError", "LL_CI", "UL_CI", "ZValue", "pValue_Z",
+                             "Q", "df", "pValue_Q", "I2", "tau", "LL_ndPred", "UL_ndPred", "number_of_effect_size",
+                             "k_0", method + "_meta_adjusted", method + "_meta_stdError_adjusted", "LL_CI_adjusted",
+                             "UL_CI_adjusted", "pValue_Z_adjusted", "Q_adjusted", "df_adjusted", "pValue_Q_adjusted",
+                             "I2_adjusted", "tau_adjusted", "LL_ndPred_adjusted", "UL_ndPred_adjusted"])
+                    writer_f.writerow([metric, resultMetaAnalysis["mean"], meta_stdError, resultMetaAnalysis["LL_CI"],
+                                       resultMetaAnalysis["UL_CI"], resultMetaAnalysis["ZValue"],
+                                       resultMetaAnalysis["pValue_Z"], resultMetaAnalysis["Q"],
+                                       resultMetaAnalysis["df"], resultMetaAnalysis["pValue_Q"],
+                                       resultMetaAnalysis["I2"], resultMetaAnalysis["tau"],
+                                       resultMetaAnalysis["LL_ndPred"], resultMetaAnalysis["UL_ndPred"], len(s),
+                                       adjusted_result["k0"], adjusted_result["mean"], meta_stdError_adjusted,
+                                       adjusted_result["LL_CI"], adjusted_result["UL_CI"], adjusted_result["pValue_Z"],
+                                       adjusted_result["Q"], adjusted_result["df"], adjusted_result["pValue_Q"],
+                                       adjusted_result["I2"], adjusted_result["tau"], adjusted_result["LL_ndPred"],
+                                       adjusted_result["UL_ndPred"]])
 
-            # except Exception as err1:
-            #     print(err1)
-            # else:
-            #     print("the meta-analysis is done correctly!")
+            except Exception as err1:
+                print(err1)
+            else:
+                print("the meta-analysis is done correctly!")
 
-            break
+            # break
 
 
 if __name__ == '__main__':
