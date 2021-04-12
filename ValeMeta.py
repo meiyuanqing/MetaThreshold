@@ -82,7 +82,7 @@ def vale_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingData\\"
             T2 = (Q - df) / C  # sample estimate of tau square
 
         if T2 < 0:
-            T2 = (- 1) * T2  # 20190719，若T2小于0，取相反数
+            T2 = 0  # 20210411，若T2小于0，取0,   M.Borenstein[2009] P114
 
         for i in range(study_number):
             random_weight[i] = 1 / (variance[i] + T2)  # random_weight 随机模型对应的权值
