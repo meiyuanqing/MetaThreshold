@@ -329,18 +329,28 @@ def pearson_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\supervised\\PearsonEffect\
                 if os.path.getsize(meta_dir + "Pearson_effects_meta.csv") == 0:
                     writer_f.writerow(
                         ["metric", "Pearson_effects_meta", "Pearson_effects_meta_stdError", "LL_CI", "UL_CI",
-                         "ZValue", "pValue_Z", "Q", "df", "pValue_Q", "I2", "tau", "number_of_effect_size",
+                         "ZValue", "pValue_Z", "Q", "df", "pValue_Q", "I2", "tau", "LL_ndPred", "UL_ndPred",
+                         "number_of_effect_size",
                          "k_0", "Pearson_effects_meta_adjusted", "Pearson_effects_meta_stdError_adjusted",
-                         "LL_CI_adjusted", "UL_CI_adjusted", "direction"])
+                         "LL_CI_adjusted", "UL_CI_adjusted", "direction", "pValue_Z_adjusted", "Q_adjusted",
+                         "df_adjusted", "pValue_Q_adjusted", "I2_adjusted", "tau_adjusted", "LL_ndPred_adjusted",
+                         "UL_ndPred_adjusted"])
                 writer_f.writerow([metric, inverse_Fisher_Z(resultMetaAnalysis["mean"]), meta_stdError,
                                    inverse_Fisher_Z(resultMetaAnalysis["LL_CI"]),
                                    inverse_Fisher_Z(resultMetaAnalysis["UL_CI"]),
                                    resultMetaAnalysis["ZValue"], resultMetaAnalysis["pValue_Z"],
                                    resultMetaAnalysis["Q"], resultMetaAnalysis["df"], resultMetaAnalysis["pValue_Q"],
-                                   resultMetaAnalysis["I2"], resultMetaAnalysis["tau"], len(FisherZ_effect_size),
+                                   resultMetaAnalysis["I2"], resultMetaAnalysis["tau"],
+                                   inverse_Fisher_Z(resultMetaAnalysis["LL_ndPred"]),
+                                   inverse_Fisher_Z(resultMetaAnalysis["UL_ndPred"]), len(FisherZ_effect_size),
                                    adjusted_result["k0"], inverse_Fisher_Z(adjusted_result["mean"]),
                                    meta_stdError_adjusted, inverse_Fisher_Z(adjusted_result["LL_CI"]),
-                                   inverse_Fisher_Z(adjusted_result["UL_CI"]), direction])
+                                   inverse_Fisher_Z(adjusted_result["UL_CI"]), direction,
+                                   adjusted_result["pValue_Z"],
+                                   adjusted_result["Q"], adjusted_result["df"], adjusted_result["pValue_Q"],
+                                   adjusted_result["I2"], adjusted_result["tau"],
+                                   inverse_Fisher_Z(adjusted_result["LL_ndPred"]),
+                                   inverse_Fisher_Z(adjusted_result["UL_ndPred"])])
 
         except Exception as err1:
             print(err1)
