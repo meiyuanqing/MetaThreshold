@@ -75,8 +75,8 @@ def roc_threshold(working_dir="F:\\NJU\\MTmeta\\experiments\\supervised\\trainin
             metric_data = filter(fun_1, fieldnames)
 
             df = pd.read_csv(file)
-            # drop all rows that have any NaN values,删除表中含有任何NaN的行
-            df.dropna(axis=0, how='any', inplace=True)
+            # drop all rows that have any NaN values,删除表中含有任何NaN的行,并重新设置行号
+            df = df.dropna(axis=0, how='any', inplace=False).reset_index(drop=True)
 
             if os.path.getsize(result_directory + "RocThreshold\\ROC_Thresholds.csv") == 0:
                 writer.writerow(["fileName", "metric", "Corr_metric_bug", "B_0", "B_0_pValue", "B_1", "B_1_pValue",
@@ -279,7 +279,7 @@ def roc_threshold(working_dir="F:\\NJU\\MTmeta\\experiments\\supervised\\trainin
                                  roc_threshold, roc_threshold_variance, roc_max_value, i_roc_max,
                                  varl_threshold, varl_threshold_variance])
 
-        break
+        # break
 
 if __name__ == '__main__':
 
