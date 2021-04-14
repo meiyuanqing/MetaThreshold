@@ -82,7 +82,6 @@ def pearson_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\supervised\\PearsonEffect\
 
         if T2 < 0:
             T2 = 0  # 20210411，若T2小于0，取0,   M.Borenstein[2009] P114
-            # T2 = (- 1) * T2  # 20190719，若T2小于0，取相反数
 
         for i in range(study_number):
             random_weight[i] = 1 / (variance[i] + T2)  # random_weight 随机模型对应的权值
@@ -278,6 +277,7 @@ def pearson_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\supervised\\PearsonEffect\
 
     # read_csv(path, keep_default_na=False, na_values=[""])  只有一个空字段将被识别为NaN
     df = pd.read_csv(meta_dir + "Pearson_effects.csv", keep_default_na=False, na_values=[""])
+    df = df.dropna(axis=0, how='any', inplace=False).reset_index(drop=True)
 
     metric_names = sorted(set(df.metric.values.tolist()))
     print("the metric_names are ", df.columns.values.tolist())
@@ -293,7 +293,7 @@ def pearson_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\supervised\\PearsonEffect\
         # print("the type FisherZ_effect_size items are ", type(FisherZ_effect_size))
         # print("the len of FisherZ_effect_size items is ", len(FisherZ_effect_size))
 
-        FisherZ_variance = df[df["metric"] == metric].loc[:, "Fisher_Z_variance"]
+        FisherZ_variance = df[df["metric"] == metric].loc[:, "Fisher_Z_variance"].astype(float)
         # print("the threshold_variance items are ", FisherZ_variance)
         # print("the type threshold_variance items are ", type(FisherZ_variance))
         # print("the len of threshold_variance items is ", len(FisherZ_variance))
@@ -302,18 +302,16 @@ def pearson_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\supervised\\PearsonEffect\
         metaThreshold['EffectSize'] = FisherZ_effect_size
         metaThreshold['Variance'] = FisherZ_variance
         try:
-            resultMetaAnalysis = random_effect_meta_analysis(
-                np.array(metaThreshold[metaThreshold["EffectSize"] > 0].loc[:, "EffectSize"]),
-                np.array(metaThreshold[metaThreshold["EffectSize"] > 0].loc[:, "Variance"]))
+            resultMetaAnalysis = random_effect_meta_analysis(np.array(metaThreshold.loc[:, "EffectSize"]),
+                                                             np.array(metaThreshold.loc[:, "Variance"]))
 
             # d["LL_CI"] = randomMean - 1.96 * randomStdError  # The 95% lower limits for the summary effect
             # d["UL_CI"] = randomMean + 1.96 * randomStdError  # The 95% upper limits for the summary effect
             meta_stdError = (inverse_Fisher_Z(resultMetaAnalysis["UL_CI"])
                              - inverse_Fisher_Z(resultMetaAnalysis["LL_CI"])) / (1.96 * 2)
 
-            adjusted_result = trimAndFill(
-                np.array(metaThreshold[metaThreshold["EffectSize"] > 0].loc[:, "EffectSize"]),
-                np.array(metaThreshold[metaThreshold["EffectSize"] > 0].loc[:, "Variance"]), 0)
+            adjusted_result = trimAndFill(np.array(metaThreshold.loc[:, "EffectSize"]),
+                                          np.array(metaThreshold.loc[:, "Variance"]), 0)
             meta_stdError_adjusted = (inverse_Fisher_Z(adjusted_result["UL_CI"])
                              - inverse_Fisher_Z(adjusted_result["LL_CI"])) / (1.96 * 2)
             if resultMetaAnalysis["pValue_Z"] > 0.5:
