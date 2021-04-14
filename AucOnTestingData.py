@@ -117,9 +117,10 @@ def auc_testing(threshold_dir="F:\\NJU\\MTmeta\\experiments\\pooled\\PoolingThre
                 for line_t in lines_t:
                     file_t = line_t.replace("\n", "")
                     print('the file is ', file_t)
+                    print('the threshold column name is ', file_t[:-5])
                     method_name = file_t.split("_")[0]
                     print("the method is ", method_name)
-                    df_t = pd.read_csv(file_t)
+                    df_t = pd.read_csv(file_t, keep_default_na=False, na_values=[""])
                     method_name_t = float(df_t[df_t["metric"] == metric].loc[:, file_t[:-5]].values[0])
                     df['predictBinary'] = df[metric].apply(lambda x: 1 if x >= method_name_t else 0)
                     # confusion_matrix()函数中需要给出label, 0和1，否则该函数算不出TP,因为不知道哪个标签是poistive.
@@ -127,24 +128,26 @@ def auc_testing(threshold_dir="F:\\NJU\\MTmeta\\experiments\\pooled\\PoolingThre
                     auc_value = roc_auc_score(df['bugBinary'], df['predictBinary'])
                     valueOfbugBinary = df["predictBinary"].value_counts()  # 0 和 1 的各自的个数
 
+                    print("the auc_value of df is ", auc_value)
                     print("the value of df is ", valueOfbugBinary)
                     print("the type value of df is ", type(valueOfbugBinary))
                     print("the repr value of df is ", repr(valueOfbugBinary))
                     print("the index value of df is ", valueOfbugBinary.keys())
-                    print("the index value of df is ", valueOfbugBinary.keys()[0])
-                    print("the index value of df is ", valueOfbugBinary.keys()[1])
-                    print("the value of valueOfbugBinary[0] is ", valueOfbugBinary[0])
-                    print("the value of valueOfbugBinary[1] is ", valueOfbugBinary[1])
+                    # print("the index value of df is ", valueOfbugBinary.keys()[0])
+                    # print("the index value of df is ", valueOfbugBinary.keys()[1])
+                    # print("the value of valueOfbugBinary[0] is ", valueOfbugBinary[0])
+                    # print("the value of valueOfbugBinary[1] is ", valueOfbugBinary[1])
                     if len(valueOfbugBinary) <= 1:
                         if valueOfbugBinary.keys()[0] == 0:
                             value_0 = valueOfbugBinary[0]
                             value_1 = 0
                         else:
                             value_0 = 0
-                            value_1 = valueOfbugBinary[0]
+                            value_1 = valueOfbugBinary[1]
                     else:
                         value_0 = valueOfbugBinary[0]
                         value_1 = valueOfbugBinary[1]
+                    print("the value_0 is ", value_0, "the value_1 is ", value_1)
                     Q1 = auc_value / (2 - auc_value)
                     Q2 = 2 * auc_value * auc_value / (1 + auc_value)
                     auc_value_variance = auc_value * (1 - auc_value) \
@@ -156,6 +159,7 @@ def auc_testing(threshold_dir="F:\\NJU\\MTmeta\\experiments\\pooled\\PoolingThre
                     metric_row.append(auc_value_variance)
                     print("the method is ", method_name, " and the auc is ", auc_value,
                           " the variance is ", auc_value_variance)
+
                 writer.writerow(metric_row)
                 # break
 
