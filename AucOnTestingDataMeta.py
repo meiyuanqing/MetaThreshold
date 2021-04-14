@@ -282,7 +282,7 @@ def auc_testing_meta(meta_dir="F:\\NJU\\MTmeta\\experiments\\pooled\\"):
 
         methods = ['AUC_Alves', 'AUC_bpp', 'AUC_Ferreira', 'AUC_gm', 'AUC_mfm', 'AUC_Oliveira', 'AUC_roc', 'AUC_Vale',
                    'AUC_varl', 'AUC_Pooled']
-        # varl_threshold_variance
+
         for method in methods:
 
             print("the s is ", method, "the s_variance is ", method + "_variance")
