@@ -107,7 +107,8 @@ def pearson_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\supervised\\PearsonEffect\
         d["LL_CI"] = randomMean - 1.96 * randomStdError  # The 95% lower limits for the summary effect
         d["UL_CI"] = randomMean + 1.96 * randomStdError  # The 95% upper limits for the summary effect
         d["ZValue"] = randomMean / randomStdError  # a Z-value to test the null hypothesis that the mean effect is zero
-        d["pValue_Z"] = 2 * (1 - norm.cdf(randomMean / randomStdError))  # norm.cdf() 返回标准正态累积分布函数值
+        d["pValue_Z"] = 2 * (1 - norm.cdf(np.abs(randomMean / randomStdError)))  # norm.cdf() 返回标准正态累积分布函数值
+                       # 20210414 双侧检验时需要增加绝对值符号np.abs
         d["Q"] = Q
         d["df"] = df
         d["pValue_Q"] = pValue_Q
