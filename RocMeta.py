@@ -344,6 +344,6 @@ if __name__ == '__main__':
     e_time = time.time()
     execution_time = e_time - s_time
 
-    print("The __name__ is ", __name__, ". This is end of Pearson.py!\n",
-          "The execution time of Pearson.py script is ", execution_time)
+    print("The __name__ is ", __name__, ". This is end of RocMeta.py!\n",
+          "The execution time of RocMeta.py script is ", execution_time)
 
