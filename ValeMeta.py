@@ -15,7 +15,6 @@ computes the variance of high level threshold: var(T)=var(cX)=c^2×var(X)=[E(T)/
 
 def vale_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingData\\",
               m_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\ValeThresholdMinified\\"):
-
     import os
     import csv
     from scipy.stats import norm  # norm.cdf() the cumulative normal distribution function in Python
@@ -59,8 +58,8 @@ def vale_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingData\\"
         d = {}  # return a dict
 
         study_number = len(variance)
-        fixed_weight = [0 for i in range(study_number)]  # 固定模型对应的权值
-        random_weight = [0 for i in range(study_number)]  # 随机模型对应的权值
+        fixed_weight = [0 for j in range(study_number)]  # 固定模型对应的权值
+        random_weight = [0 for m in range(study_number)]  # 随机模型对应的权值
 
         for i in range(study_number):
             if variance[i] == 0:
@@ -72,6 +71,7 @@ def vale_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingData\\"
             sum_WiYiYi = sum_WiYiYi + fixed_weight[i] * effect_size[i] * effect_size[i]
 
         Q = sum_WiYiYi - sum_WiYi * sum_WiYi / sum_Wi
+        # print("sum_WiYiYi is ", sum_WiYiYi, " sum_WiYi * sum_WiYi is ", sum_WiYi * sum_WiYi, " sum_Wi is ", sum_Wi)
         df = study_number - 1
         C = sum_Wi - sum_WiWi / sum_Wi
 
@@ -99,6 +99,8 @@ def vale_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingData\\"
         else:
             I2 = ((Q - df) / Q) * 100  # Higgins et al. (2003) proposed using a statistic, I2,
             # the proportion of the observed variance reflects real differences in effect size
+        if I2 < 0:
+            I2 = 0        # 20210418，若I2小于0，取0,   M.Borenstein[2009] P110
 
         pValue_Q = 1.0 - stats.chi2.cdf(Q, df)  # pValue_Q = 1.0 - stats.chi2.cdf(chisquare, freedom_degree)
 
@@ -108,7 +110,8 @@ def vale_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingData\\"
         d["LL_CI"] = randomMean - 1.96 * randomStdError  # The 95% lower limits for the summary effect
         d["UL_CI"] = randomMean + 1.96 * randomStdError  # The 95% upper limits for the summary effect
         d["ZValue"] = randomMean / randomStdError  # a Z-value to test the null hypothesis that the mean effect is zero
-        d["pValue_Z"] = 2 * (1 - norm.cdf(randomMean / randomStdError))  # norm.cdf() 返回标准正态累积分布函数值
+        d["pValue_Z"] = 2 * (1 - norm.cdf(np.abs(randomMean / randomStdError)))  # norm.cdf() 返回标准正态累积分布函数值
+        # 20210414 双侧检验时需要增加绝对值符号np.abs
         d["Q"] = Q
         d["df"] = df
         d["pValue_Q"] = pValue_Q
@@ -169,10 +172,11 @@ def vale_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingData\\"
             df_metric = pd.read_csv(metric_dir + file_name + ".csv", keep_default_na=False, na_values=[""])
             mean_metric = df_metric[metric[:-5]].mean()
             variance_metric = df_metric[metric[:-5]].var()
+            # print(metric[:-5], " the variance_metric is ", variance_metric)
             threshold_metric = df.loc[i, metric]
             # print(mean_metric,variance_metric,threshold_metric,(threshold_metric/mean_metric) ** 2 * variance_metric)
-            threshold_variance.append((threshold_metric/mean_metric) ** 2 * variance_metric)
-
+            threshold_variance.append((threshold_metric / mean_metric) ** 2 * variance_metric)
+        # dataframe的var计算公式分母用的n-1,而np.var()的计算公式分母用的n,n为样本数量
         metaThreshold = pd.DataFrame()
         metaThreshold['EffectSize'] = threshold_effect_size
         metaThreshold['Variance'] = threshold_variance
