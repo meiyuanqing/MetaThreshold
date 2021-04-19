@@ -108,7 +108,8 @@ def Alves_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingData\\
         d["LL_CI"] = randomMean - 1.96 * randomStdError  # The 95% lower limits for the summary effect
         d["UL_CI"] = randomMean + 1.96 * randomStdError  # The 95% upper limits for the summary effect
         d["ZValue"] = randomMean / randomStdError  # a Z-value to test the null hypothesis that the mean effect is zero
-        d["pValue_Z"] = 2 * (1 - norm.cdf(randomMean / randomStdError))  # norm.cdf() 返回标准正态累积分布函数值
+        # 20210419 双侧检验时需要增加绝对值符号np.abs
+        d["pValue_Z"] = 2 * (1 - norm.cdf(np.abs(randomMean / randomStdError)))  # norm.cdf() 返回标准正态累积分布函数值
         d["Q"] = Q
         d["df"] = df
         d["pValue_Q"] = pValue_Q
@@ -162,6 +163,9 @@ def Alves_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingData\\
         print("the current metric is ", metric[:-5])
 
         threshold_effect_size = df.loc[:, metric]
+        # SPD、ACAIC和ACMIC度量的high水平上阈值全为零，故取very_high水平上的阈值
+        if metric[:-5] == "ACAIC" or metric[:-5] == "ACMIC" or metric[:-5] == "SPD":
+            threshold_effect_size = df.loc[:, metric[:-5] + "_Very-High"]
 
         threshold_variance = []
         for i in range(len(df["fileName"])):
@@ -170,6 +174,8 @@ def Alves_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingData\\
             mean_metric = df_metric[metric[:-5]].mean()
             variance_metric = df_metric[metric[:-5]].var()
             threshold_metric = df.loc[i, metric]
+            if metric[:-5] == "ACAIC" or metric[:-5] == "ACMIC" or metric[:-5] == "SPD":
+                threshold_metric = df.loc[i, metric[:-5] + "_Very-High"]
             # print(mean_metric,variance_metric,threshold_metric,(threshold_metric/mean_metric) ** 2 * variance_metric)
             threshold_variance.append((threshold_metric/mean_metric) ** 2 * variance_metric)
 
