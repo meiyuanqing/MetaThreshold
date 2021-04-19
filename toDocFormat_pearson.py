@@ -36,7 +36,10 @@ def doc_format(dir_file):
     # meta_columns
     # columns = ["metric", file[:-5], file[:-5] + "_stdError", "pValue_Z"]
     # pearson_columns
-    columns = ["metric", file[:-4], file[:-4] + "_stdError", "pValue_Z", "direction"]
+    columns = ["metric", file[:-4], file[:-4] + "_stdError", "pValue_Z", "direction",
+               "number_of_effect_size", "k_0", file[:-4] + "_adjusted", file[:-4] + "_stdError_adjusted",
+               "pValue_Z_adjusted", "LL_CI_adjusted", "UL_CI_adjusted", "tau_adjusted", "Q_adjusted",
+               "pValue_Q_adjusted", "I2_adjusted", "LL_ndPred_adjusted", "UL_ndPred_adjusted"]
     # size metric
     booksheet_size = workbook.add_sheet("size", cell_overwrite_ok=True)
     size = ["AvgLine", "AvgLineBlank", "AvgLineComment", "AvgSLOC", "CountClassBase", "CountDeclClassVariable",
@@ -65,6 +68,19 @@ def doc_format(dir_file):
                     round(df[df["metric"] == size[i - 1]].loc[:, file[:-4] + "_stdError"].astype(float).values[0], 3))
         booksheet_size.write(i, 3, round(df[df["metric"] == size[i - 1]].loc[:, "pValue_Z"].astype(float).values[0], 3))
         booksheet_size.write(i, 4, str(df[df["metric"] == size[i - 1]].loc[:, "direction"].values[0]))
+        booksheet_size.write(i, 5, str(df[df["metric"] == size[i - 1]].loc[:, "number_of_effect_size"].values[0]))
+        booksheet_size.write(i, 6, str(df[df["metric"] == size[i - 1]].loc[:, "k_0"].values[0]))
+        booksheet_size.write(i, 7, round(df[df["metric"] == size[i - 1]].loc[:, file[:-4] + "_adjusted"].astype(float).values[0], 3))
+        booksheet_size.write(i, 8, round(df[df["metric"] == size[i - 1]].loc[:, file[:-4] + "_stdError_adjusted"].astype(float).values[0], 3))
+        booksheet_size.write(i, 9, round(df[df["metric"] == size[i - 1]].loc[:, "pValue_Z_adjusted"].astype(float).values[0], 3))
+        booksheet_size.write(i, 10, round(df[df["metric"] == size[i - 1]].loc[:, "LL_CI_adjusted"].astype(float).values[0], 3))
+        booksheet_size.write(i, 11, round(df[df["metric"] == size[i - 1]].loc[:, "UL_CI_adjusted"].astype(float).values[0], 3))
+        booksheet_size.write(i, 12, round(df[df["metric"] == size[i - 1]].loc[:, "tau_adjusted"].astype(float).values[0], 3))
+        booksheet_size.write(i, 13, round(df[df["metric"] == size[i - 1]].loc[:, "Q_adjusted"].astype(float).values[0], 3))
+        booksheet_size.write(i, 14, round(df[df["metric"] == size[i - 1]].loc[:, "pValue_Q_adjusted"].astype(float).values[0], 3))
+        booksheet_size.write(i, 15, round(df[df["metric"] == size[i - 1]].loc[:, "I2_adjusted"].astype(float).values[0], 3))
+        booksheet_size.write(i, 16, round(df[df["metric"] == size[i - 1]].loc[:, "LL_ndPred_adjusted"].astype(float).values[0], 3))
+        booksheet_size.write(i, 17, round(df[df["metric"] == size[i - 1]].loc[:, "UL_ndPred_adjusted"].astype(float).values[0], 3))
 
     # complexity metric
     booksheet_complexity = workbook.add_sheet("complexity", cell_overwrite_ok=True)
@@ -86,6 +102,19 @@ def doc_format(dir_file):
         booksheet_complexity.write(i, 3,
             round(df[df["metric"] == complexity[i - 1]].loc[:, "pValue_Z"].astype(float).values[0], 3))
         booksheet_complexity.write(i, 4, str(df[df["metric"] == complexity[i - 1]].loc[:, "direction"].values[0]))
+        booksheet_complexity.write(i, 5, str(df[df["metric"] == size[i - 1]].loc[:, "number_of_effect_size"].values[0]))
+        booksheet_complexity.write(i, 6, str(df[df["metric"] == size[i - 1]].loc[:, "k_0"].values[0]))
+        booksheet_complexity.write(i, 7, round(df[df["metric"] == size[i - 1]].loc[:, file[:-4] + "_adjusted"].astype(float).values[0], 3))
+        booksheet_complexity.write(i, 8, round(df[df["metric"] == size[i - 1]].loc[:, file[:-4] + "_stdError_adjusted"].astype(float).values[0], 3))
+        booksheet_complexity.write(i, 9, round(df[df["metric"] == size[i - 1]].loc[:, "pValue_Z_adjusted"].astype(float).values[0], 3))
+        booksheet_complexity.write(i, 10, round(df[df["metric"] == size[i - 1]].loc[:, "LL_CI_adjusted"].astype(float).values[0], 3))
+        booksheet_complexity.write(i, 11, round(df[df["metric"] == size[i - 1]].loc[:, "UL_CI_adjusted"].astype(float).values[0], 3))
+        booksheet_complexity.write(i, 12, round(df[df["metric"] == size[i - 1]].loc[:, "tau_adjusted"].astype(float).values[0], 3))
+        booksheet_complexity.write(i, 13, round(df[df["metric"] == size[i - 1]].loc[:, "Q_adjusted"].astype(float).values[0], 3))
+        booksheet_complexity.write(i, 14, round(df[df["metric"] == size[i - 1]].loc[:, "pValue_Q_adjusted"].astype(float).values[0], 3))
+        booksheet_complexity.write(i, 15, round(df[df["metric"] == size[i - 1]].loc[:, "I2_adjusted"].astype(float).values[0], 3))
+        booksheet_complexity.write(i, 16, round(df[df["metric"] == size[i - 1]].loc[:, "LL_ndPred_adjusted"].astype(float).values[0], 3))
+        booksheet_complexity.write(i, 17, round(df[df["metric"] == size[i - 1]].loc[:, "UL_ndPred_adjusted"].astype(float).values[0], 3))
 
     # Coupling metric
     booksheet_coupling = workbook.add_sheet("coupling", cell_overwrite_ok=True)
@@ -105,6 +134,19 @@ def doc_format(dir_file):
         booksheet_coupling.write(i, 3,
             round(df[df["metric"] == coupling[i - 1]].loc[:, "pValue_Z"].astype(float).values[0], 3))
         booksheet_coupling.write(i, 4, str(df[df["metric"] == coupling[i - 1]].loc[:, "direction"].values[0]))
+        booksheet_coupling.write(i, 5, str(df[df["metric"] == size[i - 1]].loc[:, "number_of_effect_size"].values[0]))
+        booksheet_coupling.write(i, 6, str(df[df["metric"] == size[i - 1]].loc[:, "k_0"].values[0]))
+        booksheet_coupling.write(i, 7, round(df[df["metric"] == size[i - 1]].loc[:, file[:-4] + "_adjusted"].astype(float).values[0], 3))
+        booksheet_coupling.write(i, 8, round(df[df["metric"] == size[i - 1]].loc[:, file[:-4] + "_stdError_adjusted"].astype(float).values[0], 3))
+        booksheet_coupling.write(i, 9, round(df[df["metric"] == size[i - 1]].loc[:, "pValue_Z_adjusted"].astype(float).values[0], 3))
+        booksheet_coupling.write(i, 10, round(df[df["metric"] == size[i - 1]].loc[:, "LL_CI_adjusted"].astype(float).values[0], 3))
+        booksheet_coupling.write(i, 11, round(df[df["metric"] == size[i - 1]].loc[:, "UL_CI_adjusted"].astype(float).values[0], 3))
+        booksheet_coupling.write(i, 12, round(df[df["metric"] == size[i - 1]].loc[:, "tau_adjusted"].astype(float).values[0], 3))
+        booksheet_coupling.write(i, 13, round(df[df["metric"] == size[i - 1]].loc[:, "Q_adjusted"].astype(float).values[0], 3))
+        booksheet_coupling.write(i, 14, round(df[df["metric"] == size[i - 1]].loc[:, "pValue_Q_adjusted"].astype(float).values[0], 3))
+        booksheet_coupling.write(i, 15, round(df[df["metric"] == size[i - 1]].loc[:, "I2_adjusted"].astype(float).values[0], 3))
+        booksheet_coupling.write(i, 16, round(df[df["metric"] == size[i - 1]].loc[:, "LL_ndPred_adjusted"].astype(float).values[0], 3))
+        booksheet_coupling.write(i, 17, round(df[df["metric"] == size[i - 1]].loc[:, "UL_ndPred_adjusted"].astype(float).values[0], 3))
 
     # Inheritance metric
     booksheet_inheritance = workbook.add_sheet("inheritance", cell_overwrite_ok=True)
@@ -124,6 +166,19 @@ def doc_format(dir_file):
         booksheet_inheritance.write(i, 3,
             round(df[df["metric"] == inheritance[i - 1]].loc[:, "pValue_Z"].astype(float).values[0], 3))
         booksheet_inheritance.write(i, 4, str(df[df["metric"] == inheritance[i - 1]].loc[:, "direction"].values[0]))
+        booksheet_inheritance.write(i, 5, str(df[df["metric"] == size[i - 1]].loc[:, "number_of_effect_size"].values[0]))
+        booksheet_inheritance.write(i, 6, str(df[df["metric"] == size[i - 1]].loc[:, "k_0"].values[0]))
+        booksheet_inheritance.write(i, 7, round(df[df["metric"] == size[i - 1]].loc[:, file[:-4] + "_adjusted"].astype(float).values[0], 3))
+        booksheet_inheritance.write(i, 8, round(df[df["metric"] == size[i - 1]].loc[:, file[:-4] + "_stdError_adjusted"].astype(float).values[0], 3))
+        booksheet_inheritance.write(i, 9, round(df[df["metric"] == size[i - 1]].loc[:, "pValue_Z_adjusted"].astype(float).values[0], 3))
+        booksheet_inheritance.write(i, 10, round(df[df["metric"] == size[i - 1]].loc[:, "LL_CI_adjusted"].astype(float).values[0], 3))
+        booksheet_inheritance.write(i, 11, round(df[df["metric"] == size[i - 1]].loc[:, "UL_CI_adjusted"].astype(float).values[0], 3))
+        booksheet_inheritance.write(i, 12, round(df[df["metric"] == size[i - 1]].loc[:, "tau_adjusted"].astype(float).values[0], 3))
+        booksheet_inheritance.write(i, 13, round(df[df["metric"] == size[i - 1]].loc[:, "Q_adjusted"].astype(float).values[0], 3))
+        booksheet_inheritance.write(i, 14, round(df[df["metric"] == size[i - 1]].loc[:, "pValue_Q_adjusted"].astype(float).values[0], 3))
+        booksheet_inheritance.write(i, 15, round(df[df["metric"] == size[i - 1]].loc[:, "I2_adjusted"].astype(float).values[0], 3))
+        booksheet_inheritance.write(i, 16, round(df[df["metric"] == size[i - 1]].loc[:, "LL_ndPred_adjusted"].astype(float).values[0], 3))
+        booksheet_inheritance.write(i, 17, round(df[df["metric"] == size[i - 1]].loc[:, "UL_ndPred_adjusted"].astype(float).values[0], 3))
 
     # Cohesion metric
     booksheet_cohesion = workbook.add_sheet("cohesion", cell_overwrite_ok=True)
@@ -142,6 +197,19 @@ def doc_format(dir_file):
         booksheet_cohesion.write(i, 3,
             round(df[df["metric"] == cohesion[i - 1]].loc[:, "pValue_Z"].astype(float).values[0], 3))
         booksheet_cohesion.write(i, 4, str(df[df["metric"] == cohesion[i - 1]].loc[:, "direction"].values[0]))
+        booksheet_cohesion.write(i, 5, str(df[df["metric"] == size[i - 1]].loc[:, "number_of_effect_size"].values[0]))
+        booksheet_cohesion.write(i, 6, str(df[df["metric"] == size[i - 1]].loc[:, "k_0"].values[0]))
+        booksheet_cohesion.write(i, 7, round(df[df["metric"] == size[i - 1]].loc[:, file[:-4] + "_adjusted"].astype(float).values[0], 3))
+        booksheet_cohesion.write(i, 8, round(df[df["metric"] == size[i - 1]].loc[:, file[:-4] + "_stdError_adjusted"].astype(float).values[0], 3))
+        booksheet_cohesion.write(i, 9, round(df[df["metric"] == size[i - 1]].loc[:, "pValue_Z_adjusted"].astype(float).values[0], 3))
+        booksheet_cohesion.write(i, 10, round(df[df["metric"] == size[i - 1]].loc[:, "LL_CI_adjusted"].astype(float).values[0], 3))
+        booksheet_cohesion.write(i, 11, round(df[df["metric"] == size[i - 1]].loc[:, "UL_CI_adjusted"].astype(float).values[0], 3))
+        booksheet_cohesion.write(i, 12, round(df[df["metric"] == size[i - 1]].loc[:, "tau_adjusted"].astype(float).values[0], 3))
+        booksheet_cohesion.write(i, 13, round(df[df["metric"] == size[i - 1]].loc[:, "Q_adjusted"].astype(float).values[0], 3))
+        booksheet_cohesion.write(i, 14, round(df[df["metric"] == size[i - 1]].loc[:, "pValue_Q_adjusted"].astype(float).values[0], 3))
+        booksheet_cohesion.write(i, 15, round(df[df["metric"] == size[i - 1]].loc[:, "I2_adjusted"].astype(float).values[0], 3))
+        booksheet_cohesion.write(i, 16, round(df[df["metric"] == size[i - 1]].loc[:, "LL_ndPred_adjusted"].astype(float).values[0], 3))
+        booksheet_cohesion.write(i, 17, round(df[df["metric"] == size[i - 1]].loc[:, "UL_ndPred_adjusted"].astype(float).values[0], 3))
 
     workbook.save(directory + "doc_" + file.replace("csv", "xls"))
 
