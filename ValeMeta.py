@@ -165,6 +165,9 @@ def vale_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingData\\"
         print("the current metric is ", metric[:-5])
 
         threshold_effect_size = df.loc[:, metric]
+        # SPD度量的high水平上阈值全为零，故取very_high水平上的阈值
+        if metric[:-5] == "SPD":
+            threshold_effect_size = df.loc[:, metric[:-5] + "_Very-High"]
 
         threshold_variance = []
         for i in range(len(df["fileName"])):
@@ -174,6 +177,9 @@ def vale_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingData\\"
             variance_metric = df_metric[metric[:-5]].var()
             # print(metric[:-5], " the variance_metric is ", variance_metric)
             threshold_metric = df.loc[i, metric]
+            # SPD度量的high水平上阈值全为零，故取very_high水平上的阈值
+            if metric[:-5] == "SPD":
+                threshold_metric = df.loc[i, metric[:-5] + "_Very-High"]
             # print(mean_metric,variance_metric,threshold_metric,(threshold_metric/mean_metric) ** 2 * variance_metric)
             threshold_variance.append((threshold_metric / mean_metric) ** 2 * variance_metric)
         # dataframe的var计算公式分母用的n-1,而np.var()的计算公式分母用的n,n为样本数量
