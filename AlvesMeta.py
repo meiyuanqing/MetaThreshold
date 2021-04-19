@@ -100,6 +100,9 @@ def Alves_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingData\\
             I2 = ((Q - df) / Q) * 100  # Higgins et al. (2003) proposed using a statistic, I2,
             # the proportion of the observed variance reflects real differences in effect size
 
+        if I2 < 0:
+            I2 = 0        # 20210418，若I2小于0，取0,   M.Borenstein[2009] P110
+
         pValue_Q = 1.0 - stats.chi2.cdf(Q, df)  # pValue_Q = 1.0 - stats.chi2.cdf(chisquare, freedom_degree)
 
         d["C"] = C
