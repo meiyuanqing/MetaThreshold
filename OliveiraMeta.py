@@ -99,6 +99,8 @@ def Oliveira_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingDat
         else:
             I2 = ((Q - df) / Q) * 100  # Higgins et al. (2003) proposed using a statistic, I2,
             # the proportion of the observed variance reflects real differences in effect size
+        if I2 < 0:
+            I2 = 0        # 20210418，若I2小于0，取0,   M.Borenstein[2009] P110
 
         pValue_Q = 1.0 - stats.chi2.cdf(Q, df)  # pValue_Q = 1.0 - stats.chi2.cdf(chisquare, freedom_degree)
 
@@ -108,7 +110,8 @@ def Oliveira_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingDat
         d["LL_CI"] = randomMean - 1.96 * randomStdError  # The 95% lower limits for the summary effect
         d["UL_CI"] = randomMean + 1.96 * randomStdError  # The 95% upper limits for the summary effect
         d["ZValue"] = randomMean / randomStdError  # a Z-value to test the null hypothesis that the mean effect is zero
-        d["pValue_Z"] = 2 * (1 - norm.cdf(randomMean / randomStdError))  # norm.cdf() 返回标准正态累积分布函数值
+        # 20210419 双侧检验时需要增加绝对值符号np.abs
+        d["pValue_Z"] = 2 * (1 - norm.cdf(np.abs(randomMean / randomStdError)))  # norm.cdf() 返回标准正态累积分布函数值
         d["Q"] = Q
         d["df"] = df
         d["pValue_Q"] = pValue_Q
