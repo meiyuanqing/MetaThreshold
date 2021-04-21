@@ -18,7 +18,8 @@ Five supervised methods: Bender, ROC, BPP, MFM, GM.
 """
 import time
 
-def pooled_all_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\pooled_all\\PoolingThresholds\\",
+
+def pooled_all_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingData\\",
                     m_dir="F:\\NJU\\MTmeta\\experiments\\pooled_all\\"):
     import os
     import csv
@@ -135,7 +136,6 @@ def pooled_all_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\pooled_all\\PoolingThre
         d['fixedMean'] = fixedMean
         d['fixedStdError'] = fixedStdError
         return d
-
 
     def getEstimatedK0(effectSizeArray, mean):
         centeredEffectSizeArray = []
@@ -280,12 +280,101 @@ def pooled_all_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\pooled_all\\PoolingThre
     pd.set_option('display.max_columns', None)
     pd.set_option('display.width', 5000)
 
-if __name__ == '__main__':
+    # extracts the metric names
+    df_metric_names = pd.read_csv(meta_dir + "PoolingThresholds\\ROC_Thresholds.csv",
+                                  keep_default_na=False, na_values=[""])
+    metric_names = sorted(set(df_metric_names.metric.values.tolist()))
+    print("the metric_names are ", df_metric_names.columns.values.tolist())
+    print("the metric_names are ", metric_names)
+    print("the len metric_names are ", len(metric_names))
 
+    # extracts
+    methods = ["Alves", "Ferreira", "Oliveira", "Vale", "ROC"]
+
+    with open(meta_dir + 'PoolingThresholds\\List.txt') as l:
+        lines = l.readlines()
+    print("the files are ", lines)
+    print("the number of list files is ", len(lines))
+
+    # for one metric
+    for metric in metric_names:
+
+        print("the current metric is ", metric)
+        # There are no more than 10 values of DCAEC and DCMEC metric, which are greater than 0. drop it
+        if (metric == "DCAEC") or (metric == "DCMEC"):
+            continue
+
+        # appends nine method's thresholds and their variances of each metric in training date in turn
+        threshold_effect_size = []
+        threshold_variance = []
+
+        # for one deriving threshold method
+        for line in lines:
+
+            file = line.replace("\n", "")
+            print("the current file is ", file)
+
+            if file.split("_")[0] == "Alves":
+
+                print("This is Alves method for collecting ", metric, " metric threshold value and it's variance!")
+                df = pd.read_csv(meta_dir + "PoolingThresholds\\" + file, keep_default_na=False, na_values=[""])
+                print("the ", file, "'s fileName column items are ", df.fileName.values.tolist())
+                # chooses the high level value as the threshold
+                print("the current metric is ", metric, metric + "_High")
+
+                for i in range(len(df["fileName"])):
+                    file_name = df.loc[i, "fileName"]
+                    df_training = pd.read_csv(metric_dir + file_name + ".csv", keep_default_na=False, na_values=[""])
+                    mean_metric = df_training[metric].mean()
+                    variance_metric = df_training[metric].var()
+                    # SPD、ACAIC和ACMIC度量的high水平上阈值全为零，故取very_high水平上的阈值
+                    # if metric == "ACAIC" or metric == "ACMIC" or metric == "SPD":
+                    #     threshold_metric = df.loc[i, metric + "_Very-High"]
+                    # else:
+                    #     threshold_metric = df.loc[i, metric + "_High"]
+                    # Alves方法统一每个度量在_High层次上的阈值，去除为零的阈值。
+                    threshold_metric = df.loc[i, metric + "_High"]
+                    if threshold_metric == 0:
+                        continue
+                    print(file_name, metric, mean_metric, variance_metric, threshold_metric,
+                          (threshold_metric/mean_metric) ** 2 * variance_metric)
+                    threshold_effect_size.append(threshold_metric)
+                    threshold_variance.append((threshold_metric / mean_metric) ** 2 * variance_metric)
+
+            if file.split("_")[0] == "Ferreira":
+
+                print("This is Ferreira method for collecting ", metric, " metric threshold value and it's variance!")
+                df = pd.read_csv(meta_dir + "PoolingThresholds\\" + file, keep_default_na=False, na_values=[""])
+                print("the ", file, "'s fileName column items are ", df.fileName.values.tolist())
+
+                # chooses the bad level value as the threshold
+                print("the current metric is ", metric, metric + "_Bad")
+                for i in range(len(df["fileName"])):
+                    file_name = df.loc[i, "fileName"]
+                    df_training = pd.read_csv(metric_dir + file_name + ".csv", keep_default_na=False, na_values=[""])
+                    mean_metric = df_training[metric].mean()
+                    variance_metric = df_training[metric].var()
+                    threshold_metric = df.loc[i, metric + "_Bad"]
+                    if threshold_metric == 0:
+                        continue
+                    print("the sum is ", df_training[metric].apply(lambda x: (x-threshold_metric) ** 2).sum())
+                    threshold_variance_2 = df_training[metric].apply(lambda x: (x-threshold_metric) ** 2).sum() / \
+                                           (len(df_training) - 1)
+                    print(file_name, metric, mean_metric, variance_metric, threshold_metric,
+                          (threshold_metric/mean_metric) ** 2 * variance_metric, threshold_variance_2)
+                    threshold_effect_size.append(threshold_metric)
+                    threshold_variance.append((threshold_metric / mean_metric) ** 2 * variance_metric)
+
+
+            # break
+        break
+
+
+if __name__ == '__main__':
     s_time = time.time()
     pooled_all_meta()
     e_time = time.time()
     execution_time = e_time - s_time
 
-    print("The __name__ is ", __name__, ". This is end of PooledMeta.py!\n",
-          "The execution time of PooledMeta.py script is ", execution_time)
+    print("The __name__ is ", __name__, ". This is end of pooled_all_meta.py!",
+          "\nThe execution time of pooled_all_meta.py script is ", execution_time)
