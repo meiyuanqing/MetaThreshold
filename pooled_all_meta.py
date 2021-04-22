@@ -289,7 +289,7 @@ def pooled_all_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingD
     df_metric_names = pd.read_csv(meta_dir + "PoolingThresholds\\ROC_Thresholds.csv",
                                   keep_default_na=False, na_values=[""])
     metric_names = sorted(set(df_metric_names.metric.values.tolist()))
-    print("the metric_names are ", df_metric_names.columns.values.tolist())
+    # print("the metric_names are ", df_metric_names.columns.values.tolist())
     print("the metric_names are ", metric_names)
     print("the len metric_names are ", len(metric_names))
 
@@ -300,20 +300,6 @@ def pooled_all_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingD
         lines = l.readlines()
     print("the files are ", lines)
     print("the number of list files is ", len(lines))
-
-    # with open(meta_dir + "nine_methods_thresholds.csv", 'a+', encoding="utf-8", newline='') as nine_thresholds, \
-    #         open(meta_dir + "nine_methods_meta_thresholds.csv", 'a+', encoding="utf-8", newline='') as meta_threshold:
-    #
-    #     writer_nine_thresholds = csv.writer(nine_thresholds)
-    #     writer_meta_threshold = csv.writer(meta_threshold)
-    #
-    #     nine_thresholds_fieldnames = ["method_fileName"]
-    #
-    #     if os.path.getsize(meta_dir + "nine_methods_thresholds.csv") == 0:
-    #         writer_nine_thresholds.writerow(nine_thresholds_fieldnames)
-    #     # 输出每个度量在9种方法上各训练集项目上的阈值和方差的元分析值和方差
-    #     if os.path.getsize(meta_dir + "nine_methods_meta_thresholds.csv") == 0:
-    #         writer_meta_threshold.writerow(nine_thresholds_fieldnames)
 
     # stores the threshold of each metric on the training project deriving from 9 methods
     nine_thresholds = pd.DataFrame()
@@ -335,16 +321,14 @@ def pooled_all_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingD
         for line in lines:
 
             file = line.replace("\n", "")
-            print("the current file is ", file)
 
             if file.split("_")[0] == "Alves":
 
-                print("This is Alves method for collecting ", metric, " metric threshold value and it's variance!")
                 df = pd.read_csv(meta_dir + "PoolingThresholds\\" + file, keep_default_na=False, na_values=[""])
-                print("the ", file, "'s fileName column items are ", df.fileName.values.tolist())
+
                 # chooses the high level value as the threshold
                 for project in projects:
-                    # print("the current project is ", project)
+                    print(metric, " Alves ", project)
                     project_t = []
                     for i in range(len(df["fileName"])):
                         project_name = df.loc[i, "fileName"]
@@ -357,15 +341,11 @@ def pooled_all_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingD
 
             if file.split("_")[0] == "Ferreira":
 
-                print("This is Ferreira method for collecting ", metric, " metric threshold value and it's variance!")
                 df = pd.read_csv(meta_dir + "PoolingThresholds\\" + file, keep_default_na=False, na_values=[""])
-                print("the ", file, "'s fileName column items are ", df.fileName.values.tolist())
 
                 # chooses the bad level value as the threshold
-                print("the current metric is ", metric, metric + "_Bad")
-
                 for project in projects:
-                    # print("the current project is ", project)
+                    print(metric, " Ferreira ", project)
                     project_t = []
                     for i in range(len(df["fileName"])):
                         project_name = df.loc[i, "fileName"]
@@ -375,14 +355,10 @@ def pooled_all_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingD
                     method_fileName.append("Ferreira_" + project)
                     threshold_effect_size.append(np.mean(project_t))
                     threshold_variance.append(np.std(project_t, ddof=1) ** 2)
-                    # threshold_variance.append(np.var(project_t))
 
             if file.split("_")[0] == "Oliveira":
 
-                print("This is Oliveira method for collecting ", metric, " metric threshold value and it's variance!")
                 df = pd.read_csv(meta_dir + "PoolingThresholds\\" + file, keep_default_na=False, na_values=[""])
-                print("the ", file, "'s fileName column items are ", df.fileName.values.tolist())
-                print("the columns is ", df.columns.values.tolist())
 
                 Oliveira_columns = df.columns.values.tolist()
                 for Oliveira_column in Oliveira_columns:
@@ -390,7 +366,7 @@ def pooled_all_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingD
                         metric_Oliveira = Oliveira_column
 
                 for project in projects:
-                    # print("the current project is ", project)
+                    print(metric, " Oliveira ", project)
                     project_t = []
                     for i in range(len(df["fileName"])):
                         project_name = df.loc[i, "fileName"]
@@ -400,16 +376,14 @@ def pooled_all_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingD
                     method_fileName.append("Oliveira_" + project)
                     threshold_effect_size.append(np.mean(project_t))
                     threshold_variance.append(np.std(project_t, ddof=1) ** 2)
-                    # threshold_variance.append(np.var(project_t))
 
             if file.split("_")[0] == "Vale":
 
-                print("This is Vale method for collecting ", metric, " metric threshold value and it's variance!")
                 df = pd.read_csv(meta_dir + "PoolingThresholds\\" + file, keep_default_na=False, na_values=[""])
-                print("the ", file, "'s fileName column items are ", df.fileName.values.tolist())
+
                 # chooses the high level value as the threshold
                 for project in projects:
-                    # print("the current project is ", project)
+                    print(metric, " Vale ", project)
                     project_t = []
                     for i in range(len(df["fileName"])):
                         project_name = df.loc[i, "fileName"]
@@ -422,39 +396,90 @@ def pooled_all_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingD
 
             if file.split("_")[0] == "ROC":
 
-                print("Their are supervised methods for collecting ", metric, " threshold value and it's variance!")
                 df = pd.read_csv(meta_dir + "PoolingThresholds\\" + file, keep_default_na=False, na_values=[""])
-                print("the ", file, "'s fileName column items are ", df.fileName.values.tolist())
 
                 # gm_threshold	gm_threshold_variance	gm_max_value	i_gm_max
                 supervised_methods = ["gm", "bpp", "mfm", "roc", "varl"]
 
                 for supervised_method in supervised_methods:
                     for project in projects:
-                        # print("the current project is ", project)
+
                         project_t = []
                         # project_t_variance = []
-                        for i in range(len(df["fileName"])):
-                            project_name = df.loc[i, "fileName"]
+                        project_names = df[df["metric"] == metric].loc[:, "fileName"].values.tolist()
+
+                        for project_name in project_names:
+                            # print(project, project_name)
                             if project_name.split("-")[0] == project:
-                                project_t.append(df.loc[i, supervised_method + "_threshold"])
+                                t = df[(df["metric"] == metric) & (df["fileName"] == project_name)].\
+                                       loc[:, supervised_method + "_threshold"].tolist()[0]
+                                project_t.append(t)
                                 # project_t_variance.append(df.loc[i, supervised_method + "_variance"])
                                 # print("the project_name is ", project_name, "the project_t is ", project_t)
 
                         method_fileName.append(supervised_method + "_" + project)
-                        threshold_effect_size.append(np.mean(project_t))
-                        threshold_variance.append(np.std(project_t, ddof=1) ** 2)
-
-            # break
-        break
+                        if len(project_t) == 0:
+                            threshold_effect_size.append(0)
+                            threshold_variance.append(0)
+                        elif len(project_t) == 1:
+                            threshold_effect_size.append(np.mean(project_t))
+                            threshold_variance.append(np.std(project_t, ddof=0) ** 2)
+                        else:
+                            threshold_effect_size.append(np.mean(project_t))
+                            threshold_variance.append(np.std(project_t, ddof=1) ** 2)
+                        print(metric, " ", supervised_method, " ",  project, " ", np.mean(project_t),
+                              np.std(project_t, ddof=1) ** 2)
 
         nine_thresholds["method_fileNames"] = method_fileName
         nine_thresholds[metric] = threshold_effect_size
         nine_thresholds[metric + "_variance"] = threshold_variance
-    nine_thresholds.to_csv(meta_dir + "nine_methods_thresholds.csv", encoding="ISO-8859-1", index=False, mode='w')
-        # nine_thresholds.to_csv(meta_dir + "nine_methods_thresholds.csv", encoding="ISO-8859-1", index=False, mode='a')
 
-        # 输出每个度量在9种方法上各训练集项目上的阈值和方差
+        metaThreshold_temp = pd.DataFrame()
+        metaThreshold_temp['EffectSize'] = threshold_effect_size
+        metaThreshold_temp['Variance'] = threshold_variance
+        metaThreshold = pd.DataFrame()
+        metaThreshold['EffectSize'] = np.array(
+            metaThreshold_temp[metaThreshold_temp["Variance"] > 0].loc[:, "EffectSize"])
+        metaThreshold['Variance'] = np.array(metaThreshold_temp[metaThreshold_temp["Variance"] > 0].loc[:, "Variance"])
+        try:
+            resultMetaAnalysis = random_effect_meta_analysis(
+                np.array(metaThreshold[metaThreshold["Variance"] > 0].loc[:, "EffectSize"]),
+                np.array(metaThreshold[metaThreshold["Variance"] > 0].loc[:, "Variance"]))
+
+            adjusted_result = trimAndFill(
+                np.array(metaThreshold[metaThreshold["EffectSize"] > 0].loc[:, "EffectSize"]),
+                np.array(metaThreshold[metaThreshold["EffectSize"] > 0].loc[:, "Variance"]), 0)
+
+            with open(meta_dir + "Pooled_all_meta_thresholds.csv", 'a+', encoding="utf-8", newline='') as f:
+                writer_f = csv.writer(f)
+                if os.path.getsize(meta_dir + "Pooled_all_meta_thresholds.csv") == 0:
+                    writer_f.writerow(
+                        ["metric", "Pooled_meta_threshold", "Pooled_meta_threshold_stdError", "LL_CI", "UL_CI",
+                         "ZValue", "pValue_Z", "Q", "df", "pValue_Q", "I2", "tau", "LL_ndPred", "UL_tdPred",
+                         "number_of_effect_size",
+                         "k_0", "Pooled_meta_threshold_adjusted", "Pooled_meta_threshold_stdError_adjusted",
+                         "LL_CI_adjusted", "UL_CI_adjusted", "pValue_Z_adjusted", "Q_adjusted", "df_adjusted",
+                         "pValue_Q_adjusted", "I2_adjusted", "tau_adjusted", "LL_ndPred_adjusted",
+                         "UL_ndPred_adjusted"])
+                writer_f.writerow([metric, resultMetaAnalysis["mean"], resultMetaAnalysis["stdError"],
+                                   resultMetaAnalysis["LL_CI"], resultMetaAnalysis["UL_CI"],
+                                   resultMetaAnalysis["ZValue"], resultMetaAnalysis["pValue_Z"],
+                                   resultMetaAnalysis["Q"], resultMetaAnalysis["df"], resultMetaAnalysis["pValue_Q"],
+                                   resultMetaAnalysis["I2"], resultMetaAnalysis["tau"], resultMetaAnalysis["LL_ndPred"],
+                                   resultMetaAnalysis["UL_tdPred"], len(metaThreshold),
+                                   adjusted_result["k0"], adjusted_result["mean"], adjusted_result["stdError"],
+                                   adjusted_result["LL_CI"], adjusted_result["UL_CI"], adjusted_result["pValue_Z"],
+                                   adjusted_result["Q"], adjusted_result["df"], adjusted_result["pValue_Q"],
+                                   adjusted_result["I2"], adjusted_result["tau"], adjusted_result["LL_ndPred"],
+                                   adjusted_result["UL_ndPred"]])
+
+        except Exception as err1:
+            print(err1)
+
+
+    # 输出每个度量在9种方法上各训练集项目上的阈值和方差
+    nine_thresholds.to_csv(meta_dir + "nine_methods_thresholds.csv", encoding="ISO-8859-1", index=False, mode='w')
+
 
 
 
