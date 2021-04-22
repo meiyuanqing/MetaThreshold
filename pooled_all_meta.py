@@ -13,9 +13,12 @@ Four unsupervised methods: Alves, Vale, Ferreira, Oliveira;
 Five supervised methods: Bender, ROC, BPP, MFM, GM.
 
 把9种方法上，每个度量在训练集的所有系统上的阈值和方差进行汇总元分析，而PooledMeta.py是对九种方法的元分析阈值和方差做元分析，个数只有9个。
-而本方法中元分析阈值个数为32+9*8=104个阈值和方差做元分析。此方法个数较多，倾向于用此方法的元分析阈值。
-104个度量与方差中：1种有监督学习方法(bender)在每个项目的各版本上均能产生一个阈值和方差，32个项目版本上有32个阈值；
-                剩下4种有监督学习方法和4种无监督学习方法中，只能得出每个项目上的各度量的阈值和方差，9个项目上有9*8=72个阈值。
+
+第一种思路是所的方法产生的阈值后，方差统一用项目内的均值和方差来做元分析，样本量为9*9=81.；
+第二种思路是Bender方法采用多元delta方法确定该方法阈值的方差，其余8种按项目内的均值和方差来计算。样本量为8*9+32=104.
+        而本方法中元分析阈值个数为32+9*8=104个阈值和方差做元分析。此方法个数较多，倾向于用此方法的元分析阈值。
+        104个度量与方差中：1种有监督学习方法(bender)在每个项目的各版本上均能产生一个阈值和方差，32个项目版本上有32个阈值；
+                       剩下4种有监督学习方法和4种无监督学习方法中，只能得出每个项目上的各度量的阈值和方差，9个项目上有9*8=72个阈值。
 
 """
 import time
@@ -341,17 +344,16 @@ def pooled_all_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingD
                 print("the ", file, "'s fileName column items are ", df.fileName.values.tolist())
                 # chooses the high level value as the threshold
                 for project in projects:
-                    print("the current project is ", project)
+                    # print("the current project is ", project)
                     project_t = []
                     for i in range(len(df["fileName"])):
                         project_name = df.loc[i, "fileName"]
                         if project_name.split("-")[0] == project:
                             project_t.append(df.loc[i, metric + "_High"])
-                            print("the project_name is ", project_name, "the project_t is ", project_t)
 
                     method_fileName.append("Alves_" + project)
                     threshold_effect_size.append(np.mean(project_t))
-                    threshold_variance.append(np.var(project_t))
+                    threshold_variance.append(np.std(project_t, ddof=1) ** 2)
 
             if file.split("_")[0] == "Ferreira":
 
@@ -363,17 +365,17 @@ def pooled_all_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingD
                 print("the current metric is ", metric, metric + "_Bad")
 
                 for project in projects:
-                    print("the current project is ", project)
+                    # print("the current project is ", project)
                     project_t = []
                     for i in range(len(df["fileName"])):
                         project_name = df.loc[i, "fileName"]
                         if project_name.split("-")[0] == project:
                             project_t.append(df.loc[i, metric + "_Bad"])
-                            print("the project_name is ", project_name, "the project_t is ", project_t)
 
                     method_fileName.append("Ferreira_" + project)
                     threshold_effect_size.append(np.mean(project_t))
-                    threshold_variance.append(np.var(project_t))
+                    threshold_variance.append(np.std(project_t, ddof=1) ** 2)
+                    # threshold_variance.append(np.var(project_t))
 
             if file.split("_")[0] == "Oliveira":
 
@@ -388,17 +390,17 @@ def pooled_all_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingD
                         metric_Oliveira = Oliveira_column
 
                 for project in projects:
-                    print("the current project is ", project)
+                    # print("the current project is ", project)
                     project_t = []
                     for i in range(len(df["fileName"])):
                         project_name = df.loc[i, "fileName"]
                         if project_name.split("-")[0] == project:
                             project_t.append(df.loc[i, metric_Oliveira])
-                            print("the project_name is ", project_name, "the project_t is ", project_t)
 
                     method_fileName.append("Oliveira_" + project)
                     threshold_effect_size.append(np.mean(project_t))
-                    threshold_variance.append(np.var(project_t))
+                    threshold_variance.append(np.std(project_t, ddof=1) ** 2)
+                    # threshold_variance.append(np.var(project_t))
 
             if file.split("_")[0] == "Vale":
 
@@ -407,20 +409,44 @@ def pooled_all_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingD
                 print("the ", file, "'s fileName column items are ", df.fileName.values.tolist())
                 # chooses the high level value as the threshold
                 for project in projects:
-                    print("the current project is ", project)
+                    # print("the current project is ", project)
                     project_t = []
                     for i in range(len(df["fileName"])):
                         project_name = df.loc[i, "fileName"]
                         if project_name.split("-")[0] == project:
                             project_t.append(df.loc[i, metric + "_High"])
-                            print("the project_name is ", project_name, "the project_t is ", project_t)
 
                     method_fileName.append("Vale_" + project)
                     threshold_effect_size.append(np.mean(project_t))
-                    threshold_variance.append(np.var(project_t))
+                    threshold_variance.append(np.std(project_t, ddof=1) ** 2)
+
+            if file.split("_")[0] == "ROC":
+
+                print("Their are supervised methods for collecting ", metric, " threshold value and it's variance!")
+                df = pd.read_csv(meta_dir + "PoolingThresholds\\" + file, keep_default_na=False, na_values=[""])
+                print("the ", file, "'s fileName column items are ", df.fileName.values.tolist())
+
+                # gm_threshold	gm_threshold_variance	gm_max_value	i_gm_max
+                supervised_methods = ["gm", "bpp", "mfm", "roc", "varl"]
+
+                for supervised_method in supervised_methods:
+                    for project in projects:
+                        # print("the current project is ", project)
+                        project_t = []
+                        # project_t_variance = []
+                        for i in range(len(df["fileName"])):
+                            project_name = df.loc[i, "fileName"]
+                            if project_name.split("-")[0] == project:
+                                project_t.append(df.loc[i, supervised_method + "_threshold"])
+                                # project_t_variance.append(df.loc[i, supervised_method + "_variance"])
+                                # print("the project_name is ", project_name, "the project_t is ", project_t)
+
+                        method_fileName.append(supervised_method + "_" + project)
+                        threshold_effect_size.append(np.mean(project_t))
+                        threshold_variance.append(np.std(project_t, ddof=1) ** 2)
 
             # break
-        # break
+        break
 
         nine_thresholds["method_fileNames"] = method_fileName
         nine_thresholds[metric] = threshold_effect_size
