@@ -85,7 +85,9 @@ def pooled_all_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingD
         df = study_number - 1
         C = sum_Wi - sum_WiWi / sum_Wi
 
+        # for PII metric C = 0 20210423
         # 当元分析过程中只有一个study研究时，没有研究间效应，故研究间的方差为零
+        # if study_number == 1 or C == 0:
         if study_number == 1:
             T2 = 0
         else:
@@ -312,6 +314,9 @@ def pooled_all_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingD
         if (metric == "DCAEC") or (metric == "DCMEC"):
             continue
 
+        # if metric != "PII":
+        #     continue
+
         # appends nine method's thresholds and their variances of each metric in training date in turn
         method_fileName = []
         threshold_effect_size = []
@@ -441,6 +446,7 @@ def pooled_all_meta(t_dir="F:\\NJU\\MTmeta\\experiments\\unsupervised\\trainingD
         metaThreshold['EffectSize'] = np.array(
             metaThreshold_temp[metaThreshold_temp["Variance"] > 0].loc[:, "EffectSize"])
         metaThreshold['Variance'] = np.array(metaThreshold_temp[metaThreshold_temp["Variance"] > 0].loc[:, "Variance"])
+        print("the len of len(metaThreshold)", len(metaThreshold))
         try:
             resultMetaAnalysis = random_effect_meta_analysis(
                 np.array(metaThreshold[metaThreshold["Variance"] > 0].loc[:, "EffectSize"]),
