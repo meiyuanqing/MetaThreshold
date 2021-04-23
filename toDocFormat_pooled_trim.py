@@ -182,7 +182,8 @@ def doc_format(dir_file):
 if __name__ == '__main__':
 
     s_time = time.time()
-    m_dir_file = "F:\\NJU\\MTmeta\\experiments\\pooled\\Pooled_meta_thresholds.csv"
+    # m_dir_file = "F:\\NJU\\MTmeta\\experiments\\pooled\\Pooled_meta_thresholds.csv"
+    m_dir_file = "F:\\NJU\\MTmeta\\experiments\\pooled_all\\Pooled_meta_thresholds.csv"
 
     doc_format(m_dir_file)
     e_time = time.time()
