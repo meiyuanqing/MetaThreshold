@@ -23,10 +23,7 @@ def auc_testing(threshold_dir="F:\\NJU\\MTmeta\\experiments\\pooled\\PoolingThre
                 testing_list="List.txt"):
     import os
     import csv
-    import numpy as np
     import pandas as pd
-    import statsmodels.api as sm
-    # from sklearn import metrics
     from sklearn.metrics import recall_score, precision_score, f1_score, roc_curve, auc, roc_auc_score, confusion_matrix
 
     pd.set_option('display.max_columns', None)
@@ -38,8 +35,7 @@ def auc_testing(threshold_dir="F:\\NJU\\MTmeta\\experiments\\pooled\\PoolingThre
 
     # read one of file to get the metric names for meta-analysis
     # read_csv(path, keep_default_na=False, na_values=[""])  只有一个空字段将被识别为NaN
-    df_metric_names = pd.read_csv(threshold_dir + "Pooled_meta_thresholds.csv", keep_default_na=False,
-                                  na_values=[""])
+    df_metric_names = pd.read_csv(threshold_dir + "Pooled_meta_thresholds.csv", keep_default_na=False, na_values=[""])
 
     metric_names = sorted(set(df_metric_names.metric.values.tolist()))
     print("the metric_names are ", df_metric_names.columns.values.tolist())
@@ -119,20 +115,30 @@ def auc_testing(threshold_dir="F:\\NJU\\MTmeta\\experiments\\pooled\\PoolingThre
                     print('the file is ', file_t)
                     print('the threshold column name is ', file_t[:-5])
                     method_name = file_t.split("_")[0]
-                    print("the method is ", method_name)
+                    # print("the method is ", method_name)
                     df_t = pd.read_csv(file_t, keep_default_na=False, na_values=[""])
+                    # if the metric is not in the threshold file, removes the metric.
+                    if metric not in df_t.metric.values.tolist():
+                        metric_row.append(0)
+                        metric_row.append(0)
+                        metric_row.append(0)
+                        print("the method is ", method_name, " and the auc is ", 0, " the variance is ", 0)
+                        continue
                     method_name_t = float(df_t[df_t["metric"] == metric].loc[:, file_t[:-5]].values[0])
-                    df['predictBinary'] = df[metric].apply(lambda x: 1 if x >= method_name_t else 0)
+                    if metric == "RatioCommentToCode":
+                        df['predictBinary'] = df[metric].apply(lambda x: 1 if x <= method_name_t else 0)
+                    else:
+                        df['predictBinary'] = df[metric].apply(lambda x: 1 if x >= method_name_t else 0)
                     # confusion_matrix()函数中需要给出label, 0和1，否则该函数算不出TP,因为不知道哪个标签是poistive.
                     c_matrix = confusion_matrix(df["bugBinary"], df['predictBinary'], labels=[0, 1])
                     auc_value = roc_auc_score(df['bugBinary'], df['predictBinary'])
                     valueOfbugBinary = df["predictBinary"].value_counts()  # 0 和 1 的各自的个数
 
-                    print("the auc_value of df is ", auc_value)
-                    print("the value of df is ", valueOfbugBinary)
-                    print("the type value of df is ", type(valueOfbugBinary))
-                    print("the repr value of df is ", repr(valueOfbugBinary))
-                    print("the index value of df is ", valueOfbugBinary.keys())
+                    # print("the auc_value of df is ", auc_value)
+                    # print("the value of df is ", valueOfbugBinary)
+                    # print("the type value of df is ", type(valueOfbugBinary))
+                    # print("the repr value of df is ", repr(valueOfbugBinary))
+                    # print("the index value of df is ", valueOfbugBinary.keys())
                     # print("the index value of df is ", valueOfbugBinary.keys()[0])
                     # print("the index value of df is ", valueOfbugBinary.keys()[1])
                     # print("the value of valueOfbugBinary[0] is ", valueOfbugBinary[0])
@@ -147,7 +153,11 @@ def auc_testing(threshold_dir="F:\\NJU\\MTmeta\\experiments\\pooled\\PoolingThre
                     else:
                         value_0 = valueOfbugBinary[0]
                         value_1 = valueOfbugBinary[1]
-                    print("the value_0 is ", value_0, "the value_1 is ", value_1)
+                    # print("the value_0 is ", value_0, "the value_1 is ", value_1)
+                    if auc_value > 1 or auc_value < 0:
+                        continue
+                    elif auc_value < 0.5:
+                        auc_value = 1 - auc_value
                     Q1 = auc_value / (2 - auc_value)
                     Q2 = 2 * auc_value * auc_value / (1 + auc_value)
                     auc_value_variance = auc_value * (1 - auc_value) \

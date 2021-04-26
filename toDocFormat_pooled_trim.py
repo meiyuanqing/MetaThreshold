@@ -53,6 +53,7 @@ def doc_format(dir_file):
     for i in range(len(size) + 1):
         if i == 0:
             continue
+        print(i - 1, size[i - 1])
         booksheet_size.write(i, 0, size[i - 1])
         # print("the type is ",  df[df["metric"] == size[i-1]].loc[:, file[:-5]])
         # print("the type is ",  df[df["metric"] == size[i-1]].loc[:, file[:-5]].values)
@@ -102,9 +103,9 @@ def doc_format(dir_file):
         booksheet_complexity.write(i, 12, "[" + str(round(df[df["metric"] == complexity[i - 1]].loc[:, "LL_ndPred_adjusted"].astype(float).values[0], 3)) + ",")
         booksheet_complexity.write(i, 13, str(round(df[df["metric"] == complexity[i - 1]].loc[:, "UL_ndPred_adjusted"].astype(float).values[0], 3)) + "]")
 
-    # Coupling metric "ACAIC","ACMIC",
+    # Coupling metric
     booksheet_coupling = workbook.add_sheet("coupling", cell_overwrite_ok=True)
-    coupling = ["AMMIC", "CBI", "CBO", "CountDeclMethodAll", "DAC", "DACquote", "DMMEC", "ICP",
+    coupling = ["ACAIC", "ACMIC", "AMMIC", "CBI", "CBO", "CountDeclMethodAll", "DAC", "DACquote", "DMMEC", "ICP",
                 "IHICP", "MPC", "NIHICP", "OCAEC", "OCAIC", "OCMEC", "OCMIC", "OMMEC", "OMMIC", "RFC"]
     for j in range(len(columns)):
         booksheet_coupling.write(0, j, columns[j])
@@ -183,7 +184,9 @@ if __name__ == '__main__':
 
     s_time = time.time()
     # m_dir_file = "F:\\NJU\\MTmeta\\experiments\\pooled\\Pooled_meta_thresholds.csv"
-    m_dir_file = "F:\\NJU\\MTmeta\\experiments\\pooled_all\\Pooled_meta_thresholds.csv"
+    # m_dir_file = "F:\\NJU\\MTmeta\\experiments\\pooled_all\\Pooled_meta_thresholds.csv"
+    # m_dir_file = "F:\\NJU\\MTmeta\\experiments\\pooled\\AUC_Pooled_metas.csv"
+    m_dir_file = "F:\\NJU\\MTmeta\\experiments\\pooled\\AUC_Alves_metas.csv"
 
     doc_format(m_dir_file)
     e_time = time.time()

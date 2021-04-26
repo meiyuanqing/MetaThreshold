@@ -309,7 +309,8 @@ def auc_testing_meta(meta_dir="F:\\NJU\\MTmeta\\experiments\\pooled\\"):
                     writer_f = csv.writer(f)
                     if os.path.getsize(meta_dir + method + "_meta.csv") == 0:
                         writer_f.writerow(
-                            ["metric", method + "_meta", method + "_meta_stdError", "LL_CI", "UL_CI", "ZValue", "pValue_Z",
+                            ["metric", method + "_meta", method + "_meta_stdError", "LL_CI", "UL_CI", "ZValue",
+                             "pValue_Z",
                              "Q", "df", "pValue_Q", "I2", "tau", "LL_ndPred", "UL_ndPred", "number_of_effect_size",
                              "k_0", method + "_meta_adjusted", method + "_meta_stdError_adjusted", "LL_CI_adjusted",
                              "UL_CI_adjusted", "pValue_Z_adjusted", "Q_adjusted", "df_adjusted", "pValue_Q_adjusted",
