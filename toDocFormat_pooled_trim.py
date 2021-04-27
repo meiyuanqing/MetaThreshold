@@ -34,7 +34,7 @@ def doc_format(dir_file):
 
     workbook = xlwt.Workbook(encoding='utf-8')
     # 阈值	方差	P值	[LL, 	UL]	τ	Q	p-value	I2	[LL_Pred,	UL_Pred]
-    columns = ["metric", file[:-5], "k_0", file[:-5] + "_adjusted", file[:-5] + "_stdError_adjusted",
+    columns = ["metric", "k_0", "direction", file[:-5] + "_adjusted", file[:-5] + "_stdError_adjusted",
                "pValue_Z_adjusted", "LL_CI_adjusted", "UL_CI_adjusted", "tau_adjusted", "Q_adjusted",
                "pValue_Q_adjusted", "I2_adjusted", "LL_ndPred_adjusted", "UL_ndPred_adjusted"]
     # columns = ["metric", file[:-5], file[:-5] + "_stdError", "pValue_Z", "LL_CI", "UL_CI", "tau", "Q",  "pValue_Q",
@@ -54,6 +54,11 @@ def doc_format(dir_file):
         if i == 0:
             continue
         print(i - 1, size[i - 1])
+        if df[df["metric"] == size[i - 1]].loc[:, file[:-5] + "_adjusted"].astype(float).values[0] > \
+                df[df["metric"] == size[i - 1]].loc[:, file[:-5]].values[0]:
+            direction = "Right"
+        else:
+            direction = "Left"
         booksheet_size.write(i, 0, size[i - 1])
         # print("the type is ",  df[df["metric"] == size[i-1]].loc[:, file[:-5]])
         # print("the type is ",  df[df["metric"] == size[i-1]].loc[:, file[:-5]].values)
@@ -62,8 +67,8 @@ def doc_format(dir_file):
         # print("the type is ",  repr(round(df[df["metric"] == size[i-1]].loc[:, file[:-5]].values[0], 3)))
         # print("the type is ",  type(df[df["metric"] == size[i-1]].loc[:, file[:-5]].values[0]))
         # meta is -5, pearson is -4
-        booksheet_size.write(i, 1, str(df[df["metric"] == size[i - 1]].loc[:, file[:-5]].values[0]))
-        booksheet_size.write(i, 2, str(df[df["metric"] == size[i - 1]].loc[:, "k_0"].values[0]))
+        booksheet_size.write(i, 1, str(df[df["metric"] == size[i - 1]].loc[:, "k_0"].values[0]))
+        booksheet_size.write(i, 2, direction)
         booksheet_size.write(i, 3, round(df[df["metric"] == size[i - 1]].loc[:, file[:-5] + "_adjusted"].astype(float).values[0], 3))
         booksheet_size.write(i, 4, round(df[df["metric"] == size[i - 1]].loc[:, file[:-5] + "_stdError_adjusted"].astype(float).values[0], 3))
         booksheet_size.write(i, 5, round(df[df["metric"] == size[i - 1]].loc[:, "pValue_Z_adjusted"].astype(float).values[0], 3))
@@ -87,10 +92,15 @@ def doc_format(dir_file):
     for i in range(len(complexity) + 1):
         if i == 0:
             continue
+        if df[df["metric"] == complexity[i - 1]].loc[:, file[:-5] + "_adjusted"].astype(float).values[0] > \
+                df[df["metric"] == complexity[i - 1]].loc[:, file[:-5]].values[0]:
+            direction = "Right"
+        else:
+            direction = "Left"
         print(i - 1, complexity[i - 1])
         booksheet_complexity.write(i, 0, complexity[i - 1])
-        booksheet_complexity.write(i, 1, str(df[df["metric"] == complexity[i - 1]].loc[:, file[:-5]].values[0]))
-        booksheet_complexity.write(i, 2, str(df[df["metric"] == complexity[i - 1]].loc[:, "k_0"].values[0]))
+        booksheet_complexity.write(i, 1, str(df[df["metric"] == complexity[i - 1]].loc[:, "k_0"].values[0]))
+        booksheet_complexity.write(i, 2, direction)
         booksheet_complexity.write(i, 3, round(df[df["metric"] == complexity[i - 1]].loc[:, file[:-5] + "_adjusted"].astype(float).values[0], 3))
         booksheet_complexity.write(i, 4, round(df[df["metric"] == complexity[i - 1]].loc[:, file[:-5] + "_stdError_adjusted"].astype(float).values[0], 3))
         booksheet_complexity.write(i, 5, round(df[df["metric"] == complexity[i - 1]].loc[:, "pValue_Z_adjusted"].astype(float).values[0], 3))
@@ -113,9 +123,14 @@ def doc_format(dir_file):
         if i == 0:
             continue
         print(i - 1, coupling[i - 1])
+        if df[df["metric"] == coupling[i - 1]].loc[:, file[:-5] + "_adjusted"].astype(float).values[0] > \
+                df[df["metric"] == coupling[i - 1]].loc[:, file[:-5]].values[0]:
+            direction = "Right"
+        else:
+            direction = "Left"
         booksheet_coupling.write(i, 0, coupling[i - 1])
-        booksheet_coupling.write(i, 1, str(df[df["metric"] == coupling[i - 1]].loc[:, file[:-5]].values[0]))
-        booksheet_coupling.write(i, 2, str(df[df["metric"] == coupling[i - 1]].loc[:, "k_0"].values[0]))
+        booksheet_coupling.write(i, 1, str(df[df["metric"] == coupling[i - 1]].loc[:, "k_0"].values[0]))
+        booksheet_coupling.write(i, 2, direction)
         booksheet_coupling.write(i, 3, round(df[df["metric"] == coupling[i - 1]].loc[:, file[:-5] + "_adjusted"].astype(float).values[0], 3))
         booksheet_coupling.write(i, 4, round(df[df["metric"] == coupling[i - 1]].loc[:, file[:-5] + "_stdError_adjusted"].astype(float).values[0], 3))
         booksheet_coupling.write(i, 5, round(df[df["metric"] == coupling[i - 1]].loc[:, "pValue_Z_adjusted"].astype(float).values[0], 3))
@@ -138,9 +153,14 @@ def doc_format(dir_file):
         if i == 0:
             continue
         print(i - 1, inheritance[i - 1])
+        if df[df["metric"] == inheritance[i - 1]].loc[:, file[:-5] + "_adjusted"].astype(float).values[0] > \
+                df[df["metric"] == inheritance[i - 1]].loc[:, file[:-5]].values[0]:
+            direction = "Right"
+        else:
+            direction = "Left"
         booksheet_inheritance.write(i, 0, inheritance[i - 1])
-        booksheet_inheritance.write(i, 1, str(df[df["metric"] == inheritance[i - 1]].loc[:, file[:-5]].values[0]))
-        booksheet_inheritance.write(i, 2, str(df[df["metric"] == inheritance[i - 1]].loc[:, "k_0"].values[0]))
+        booksheet_inheritance.write(i, 1, str(df[df["metric"] == inheritance[i - 1]].loc[:, "k_0"].values[0]))
+        booksheet_inheritance.write(i, 2, direction)
         booksheet_inheritance.write(i, 3, round(df[df["metric"] == inheritance[i - 1]].loc[:, file[:-5] + "_adjusted"].astype(float).values[0], 3))
         booksheet_inheritance.write(i, 4, round(df[df["metric"] == inheritance[i - 1]].loc[:, file[:-5] + "_stdError_adjusted"].astype(float).values[0], 3))
         booksheet_inheritance.write(i, 5, round(df[df["metric"] == inheritance[i - 1]].loc[:, "pValue_Z_adjusted"].astype(float).values[0], 3))
@@ -162,9 +182,14 @@ def doc_format(dir_file):
         if i == 0:
             continue
         print(i - 1, cohesion[i - 1])
+        if df[df["metric"] == cohesion[i - 1]].loc[:, file[:-5] + "_adjusted"].astype(float).values[0] > \
+                df[df["metric"] == cohesion[i - 1]].loc[:, file[:-5]].values[0]:
+            direction = "Right"
+        else:
+            direction = "Left"
         booksheet_cohesion.write(i, 0, cohesion[i - 1])
-        booksheet_cohesion.write(i, 1, str(df[df["metric"] == cohesion[i - 1]].loc[:, file[:-5]].values[0]))
-        booksheet_cohesion.write(i, 2, str(df[df["metric"] == cohesion[i - 1]].loc[:, "k_0"].values[0]))
+        booksheet_cohesion.write(i, 1, str(df[df["metric"] == cohesion[i - 1]].loc[:, "k_0"].values[0]))
+        booksheet_cohesion.write(i, 2, direction)
         booksheet_cohesion.write(i, 3, round(df[df["metric"] == cohesion[i - 1]].loc[:, file[:-5] + "_adjusted"].astype(float).values[0], 3))
         booksheet_cohesion.write(i, 4, round(df[df["metric"] == cohesion[i - 1]].loc[:, file[:-5] + "_stdError_adjusted"].astype(float).values[0], 3))
         booksheet_cohesion.write(i, 5, round(df[df["metric"] == cohesion[i - 1]].loc[:, "pValue_Z_adjusted"].astype(float).values[0], 3))
@@ -186,7 +211,8 @@ if __name__ == '__main__':
     # m_dir_file = "F:\\NJU\\MTmeta\\experiments\\pooled\\Pooled_meta_thresholds.csv"
     # m_dir_file = "F:\\NJU\\MTmeta\\experiments\\pooled_all\\Pooled_meta_thresholds.csv"
     # m_dir_file = "F:\\NJU\\MTmeta\\experiments\\pooled\\AUC_Pooled_metas.csv"
-    m_dir_file = "F:\\NJU\\MTmeta\\experiments\\pooled\\AUC_Alves_metas.csv"
+    # m_dir_file = "F:\\NJU\\MTmeta\\experiments\\pooled\\AUC_Alves_metas.csv"
+    m_dir_file = "F:\\NJU\\MTmeta\\experiments\\pooled_all\\single_method\\supervised_meta_thresholds.csv"
 
     doc_format(m_dir_file)
     e_time = time.time()
